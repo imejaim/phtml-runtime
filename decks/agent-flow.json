@@ -1,0 +1,34 @@
+{
+  "title": "Agent Flow",
+  "theme": "dark-tech",
+  "slides": [
+    {
+      "boxes": [
+        {
+          "className": "phtml-box eyebrow",
+          "text": "Agentic Presentation",
+          "x": 60,
+          "y": 54,
+          "w": 420,
+          "h": 48
+        },
+        {
+          "className": "phtml-box title",
+          "text": "Agent Flow Runtime",
+          "x": 54,
+          "y": 132,
+          "w": 900,
+          "h": 200
+        },
+        {
+          "className": "phtml-box subtitle",
+          "text": "Planning to execution pipeline",
+          "x": 62,
+          "y": 390,
+          "w": 760,
+          "h": 90
+        }
+      ]
+    }
+  ]
+}
