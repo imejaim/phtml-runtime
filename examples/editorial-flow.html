@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHTML Editorial Flow</title>
+  <link rel="stylesheet" href="../runtime/phtml.css" />
+  <link rel="stylesheet" href="../themes/editorial-light.css" />
+</head>
+<body>
+  <canvas id="smoke" style="position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.65"></canvas>
+
+  <div class="phtml-hint">Flow mode · E: edit · drag boxes</div>
+  <div class="phtml-status">Flow Presentation</div>
+
+  <main class="phtml-deck flow"></main>
+
+  <script src="../runtime/phtml.js"></script>
+  <script>
+    const deck = {
+      title: 'Editorial Flow',
+      slides: [
+        {
+          boxes: [
+            { className:'phtml-box editorial-meta motion-rise', text:'A001 · AGENTIC PRESENTATION', x:50, y:40, w:420, h:40 },
+            { className:'phtml-box editorial-title motion-rise', text:'Flow\nDeck', x:40, y:110, w:720, h:260 },
+            { className:'phtml-box editorial-copy motion-rise', text:'웹사이트처럼 흐르는 발표. 큰 타이포그래피와 여백, 그리고 editable runtime.', x:740, y:320, w:420, h:220 },
+            { className:'phtml-box editorial-pill motion-rise', text:'Edit · Drag · Export', x:740, y:560, w:320, h:70 }
+          ]
+        },
+        {
+          boxes: [
+            { className:'phtml-box editorial-meta motion-rise', text:'A002 · EDIT MODE', x:50, y:40, w:420, h:40 },
+            { className:'phtml-box editorial-title motion-rise', text:'Still\nEditable', x:40, y:120, w:720, h:260 },
+            { className:'phtml-box editorial-card motion-rise', text:'', x:760, y:120, w:360, h:420 },
+            { className:'phtml-box editorial-copy motion-rise', text:'편집 모드에서는 박스를 이동, 복제, 삭제, 추가할 수 있고 오른쪽 패널에서 폰트 크기와 색상도 수정 가능합니다.', x:50, y:470, w:620, h:200 }
+          ]
+        }
+      ]
+    };
+
+    PHTML.init({ deck });
+
+    document.querySelector('.phtml-toolbar').classList.add('side-panel');
+
+    const sections = [...document.querySelectorAll('.phtml-slide')];
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        entry.target.classList.toggle('visible', entry.isIntersecting);
+      });
+    }, { threshold: .42 });
+    sections.forEach(s => observer.observe(s));
+
+    const canvas = document.getElementById('smoke');
+    const ctx = canvas.getContext('2d', { alpha:true });
+    const particles = [];
+
+    function resize(){
+      canvas.width = innerWidth * devicePixelRatio;
+      canvas.height = innerHeight * devicePixelRatio;
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+
+    function addParticle(x,y){
+      for(let i=0;i<2;i++){
+        particles.push({x,y,vx:(Math.random()-.5)*1.1,vy:(Math.random()-.5)*1.1,r:12+Math.random()*28,life:1});
+      }
+      if(particles.length>180) particles.splice(0, particles.length-180);
+    }
+
+    function animate(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      ctx.globalCompositeOperation='multiply';
+      for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];
+        p.x+=p.vx; p.y+=p.vy; p.vx*=.985; p.vy*=.985; p.r+=.28; p.life-=.012;
+        if(p.life<=0){particles.splice(i,1); continue;}
+        const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+        g.addColorStop(0,`rgba(255,79,36,${0.055*p.life})`);
+        g.addColorStop(.45,`rgba(40,40,40,${0.028*p.life})`);
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    let lastMouse=0;
+    addEventListener('pointermove',e=>{
+      const now=performance.now();
+      if(now-lastMouse>22){ addParticle(e.clientX,e.clientY); lastMouse=now; }
+    });
+
+    resize();
+    addEventListener('resize', resize);
+    animate();
+  </script>
+</body>
+</html>
