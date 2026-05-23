@@ -8,31 +8,16 @@
   <link rel="stylesheet" href="../themes/dark-tech.css" />
 </head>
 <body>
-  <div class="phtml-hint">E: edit mode</div>
+  <div class="phtml-hint">E: edit mode · arrows: navigate · drag boxes in edit mode</div>
   <div class="phtml-status">Presentation Mode</div>
 
-  <main class="phtml-deck">
-    <section class="phtml-slide active">
-      <div class="phtml-canvas">
-        <div class="phtml-box eyebrow" style="left:60px;top:54px;width:420px;height:48px;">Agentic Presentation</div>
-        <div class="phtml-box title" style="left:54px;top:132px;width:900px;height:200px;">PHTML Runtime</div>
-        <div class="phtml-box subtitle" style="left:62px;top:390px;width:760px;height:90px;">Editable HTML presentation runtime</div>
-      </div>
-    </section>
-  </main>
-
-  <div class="phtml-toolbar">
-    <button onclick="toggleEdit()">Toggle Edit</button>
-    <button onclick="addBox()">Add Box</button>
-    <button onclick="duplicateBox()">Duplicate</button>
-    <button onclick="deleteBox()">Delete</button>
-  </div>
-
-  <div class="phtml-nav">
-    <button onclick="prevSlide()">←</button>
-    <button onclick="nextSlide()">→</button>
-  </div>
+  <main class="phtml-deck"></main>
 
   <script src="../runtime/phtml.js"></script>
+  <script>
+    PHTML.init({
+      deckUrl: '../decks/agent-flow.json'
+    });
+  </script>
 </body>
 </html>
