@@ -572,8 +572,10 @@ ${toolbarHtml()}
     }
   }
 
-  function setupIntersectionObserver() {
+  function setupIntersectionObserver(scrollRoot) {
     if (state.intersectionObserver) state.intersectionObserver.disconnect();
+    const observerOpts = { threshold: 0.5 };
+    if (scrollRoot) observerOpts.root = scrollRoot;
     state.intersectionObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         entry.target.classList.toggle('visible', entry.isIntersecting);
@@ -588,8 +590,79 @@ ${toolbarHtml()}
           }
         }
       });
-    }, { threshold: 0.5 });
+    }, observerOpts);
     getSlides().forEach((s) => state.intersectionObserver.observe(s));
+  }
+
+  function setupScrollMode() {
+    const deckEl = $('.phtml-deck');
+    if (!deckEl) return;
+
+    // Use inline setProperty('...', 'important') to reliably override phtml.css
+    const sp = (el, prop, val) => el.style.setProperty(prop, val, 'important');
+
+    // body = scroll container
+    sp(document.documentElement, 'overflow', 'hidden');
+    sp(document.body, 'overflow-y', 'scroll');
+    sp(document.body, 'scroll-snap-type', 'y mandatory');
+    sp(document.body, 'scrollbar-width', 'none');
+    sp(document.body, 'height', '100vh');
+
+    // deck: normal block flow so slides stack vertically
+    sp(deckEl, 'position', 'relative');
+    sp(deckEl, 'overflow', 'visible');
+    sp(deckEl, 'height', 'auto');
+    sp(deckEl, 'width', '100%');
+    sp(deckEl, 'inset', 'auto');
+
+    // Each slide: break out of absolute positioning, become flow element
+    const slides = getSlides();
+    slides.forEach((slide) => {
+      sp(slide, 'position', 'relative');
+      sp(slide, 'inset', 'auto');
+      sp(slide, 'display', 'flex');
+      sp(slide, 'width', '100%');
+      sp(slide, 'height', '100vh');
+      sp(slide, 'scroll-snap-align', 'start');
+      sp(slide, 'scroll-snap-stop', 'always');
+      sp(slide, 'overflow', 'hidden');
+      sp(slide, 'flex-shrink', '0');
+    });
+
+    // Also add webkit scrollbar hide via stylesheet
+    const st = document.createElement('style');
+    st.textContent = 'body::-webkit-scrollbar{display:none}';
+    document.head.appendChild(st);
+
+    // Reset to slide 0
+    state.currentSlide = 0;
+    slides.forEach((s, i) => s.classList.toggle('active', i === 0));
+    if (slides[0]) slides[0].classList.add('visible');
+    document.body.scrollTop = 0;
+    updateStatus();
+    updateThumbnails();
+
+    // IntersectionObserver with viewport root (body scroll)
+    setupIntersectionObserver(null);
+
+    // Override navigation to scroll instead of toggle display
+    const _showSlide = showSlide;
+    state.scrollMode = true;
+    window.PHTML.showSlide = (index) => {
+      const slides = getSlides();
+      const target = slides[clamp(index, 0, slides.length - 1)];
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    window.showSlide = window.PHTML.showSlide;
+    window.PHTML.nextSlide = () => {
+      const slides = getSlides();
+      window.PHTML.showSlide(state.currentSlide + 1);
+    };
+    window.PHTML.prevSlide = () => {
+      window.PHTML.showSlide(state.currentSlide - 1);
+    };
+    window.nextSlide = window.PHTML.nextSlide;
+    window.prevSlide = window.PHTML.prevSlide;
   }
 
   function bindBoxEvents() {
@@ -823,7 +896,11 @@ ${toolbarHtml()}
     if (options.agentBridge) {
       connectAgentBridge(options.agentBridge === true ? undefined : options.agentBridge);
     }
-    scaleCanvas();
+    if (options.scrollMode) {
+      setupScrollMode();
+    } else {
+      scaleCanvas();
+    }
   }
 
   window.PHTML = {
