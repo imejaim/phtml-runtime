@@ -1,0 +1,31 @@
+{
+  "name": "phtml-runtime",
+  "version": "1.0.0",
+  "description": "Agentic HTML presentation runtime — beautiful by default, editable by AI",
+  "keywords": ["presentation", "slides", "agent", "ai", "html", "runtime", "phtml"],
+  "author": "imejaim",
+  "license": "MIT",
+  "main": "runtime/phtml.js",
+  "bin": {
+    "phtml": "./cli/index.js"
+  },
+  "files": [
+    "runtime/",
+    "themes/",
+    "cli/",
+    "examples/",
+    "decks/"
+  ],
+  "scripts": {
+    "start": "node cli/index.js serve",
+    "dev": "node cli/index.js serve --open"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imejaim/phtml-runtime.git"
+  },
+  "homepage": "https://github.com/imejaim/phtml-runtime"
+}

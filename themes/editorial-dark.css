@@ -1,16 +1,15 @@
-/* PHTML — Editorial Light Theme */
+/* PHTML — Editorial Dark Theme */
 
 :root {
-  --phtml-bg:         #fafaf8;
-  --phtml-bg-surface: #f2f2f0;
-  --phtml-bg-card:    #eeeeec;
-  --phtml-text:       #0d0d0c;
-  --phtml-text-muted: #666660;
+  --phtml-bg:         #0a0a0a;
+  --phtml-bg-surface: #111111;
+  --phtml-bg-card:    #181818;
+  --phtml-text:       #f0f0ee;
+  --phtml-text-muted: #888880;
   --phtml-accent:     #ff4f2a;
-  --phtml-accent-dim: rgba(255, 79, 42, 0.1);
-  --phtml-border:     rgba(0, 0, 0, 0.09);
-  --phtml-border-strong: rgba(0, 0, 0, 0.18);
-  --phtml-panel:      rgba(250, 250, 248, 0.88);
+  --phtml-accent-dim: rgba(255, 79, 42, 0.12);
+  --phtml-border:     rgba(255, 255, 255, 0.08);
+  --phtml-border-strong: rgba(255, 255, 255, 0.16);
 }
 
 body {
@@ -20,23 +19,6 @@ body {
 
 .phtml-slide {
   background: var(--phtml-bg);
-}
-
-/* ── Column rule grid overlay ─────────────────────────────────── */
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 0 7.7vw,
-    rgba(0,0,0,0.04) 7.7vw calc(7.7vw + 1px),
-    transparent calc(7.7vw + 1px)
-  );
-  background-size: 15.4vw 100%;
 }
 
 /* ── Box types ────────────────────────────────────────────────── */
@@ -105,12 +87,12 @@ body::before {
   font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
   font-size: clamp(12px, 1.3vw, 16px);
   line-height: 1.8;
-  background: #f0f0ee;
+  background: #0d0d0d;
   border: 1px solid var(--phtml-border);
   border-left: 3px solid var(--phtml-accent);
   border-radius: var(--phtml-radius);
   padding: 20px 24px;
-  color: #1a1a18;
+  color: #7dff7a;
   white-space: pre;
 }
 
@@ -127,6 +109,11 @@ body::before {
   white-space: nowrap;
 }
 
+.phtml-box.pill.accent-pill {
+  border-color: var(--phtml-accent);
+  color: var(--phtml-accent);
+}
+
 .phtml-box.number {
   font-size: clamp(64px, 10vw, 160px);
   font-weight: 900;
@@ -136,16 +123,16 @@ body::before {
 }
 
 .phtml-box.divider {
-  background: var(--phtml-border-strong);
+  background: var(--phtml-border);
   border-radius: 2px;
 }
 
 /* ── Toolbar theming ──────────────────────────────────────────── */
 
 .phtml-toolbar {
-  background: var(--phtml-panel);
+  background: rgba(20, 20, 20, 0.92);
   border: 1px solid var(--phtml-border);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.04);
   color: var(--phtml-text);
 }
 
@@ -161,12 +148,16 @@ body::before {
 
 .phtml-toolbar button:hover,
 .phtml-toolbar label:hover {
-  background: rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.07);
 }
 
 .phtml-toolbar input[type="number"] {
-  background: rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.06);
   color: var(--phtml-text);
+}
+
+.phtml-toolbar input[type="number"]:focus {
+  outline: 1px solid var(--phtml-accent);
 }
 
 /* ── Status + Hint + Nav ──────────────────────────────────────── */
@@ -176,12 +167,12 @@ body::before {
 }
 
 .phtml-nav button {
-  background: rgba(0,0,0,0.07);
+  background: rgba(255,255,255,0.07);
   color: var(--phtml-text);
 }
 
 .phtml-nav button:hover {
-  background: rgba(0,0,0,0.14);
+  background: rgba(255,255,255,0.14);
 }
 
 .phtml-dot {
@@ -190,66 +181,24 @@ body::before {
 
 .phtml-dot.active {
   background: var(--phtml-accent);
+  opacity: 1;
 }
 
-/* ── Edit mode ────────────────────────────────────────────────── */
+/* ── Slide accent line (top border) ───────────────────────────── */
+
+.phtml-slide:first-child::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--phtml-accent);
+  z-index: 10;
+}
+
+/* ── Selection highlight in edit mode ─────────────────────────── */
 
 .phtml-edit-mode .phtml-box {
-  outline-color: rgba(0,0,0,0.12);
-}
-
-.phtml-edit-mode .phtml-box.selected {
-  outline-color: var(--phtml-accent);
-  box-shadow: 0 0 0 4px rgba(255, 79, 42, 0.12);
-}
-
-/* ── Flow mode (backward compat with editorial-flow.html) ─────── */
-
-.phtml-deck.flow {
-  width: 100vw;
-  height: auto;
-  min-height: 100vh;
-  scroll-snap-type: y mandatory;
-  overflow-y: scroll;
-  scrollbar-width: none;
-}
-
-.phtml-deck.flow::-webkit-scrollbar { display: none; }
-
-.phtml-deck.flow .phtml-slide {
-  display: grid !important;
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  padding: 9vh 7vw 7vh;
-  align-items: center;
-  scroll-snap-align: start;
-}
-
-.phtml-deck.flow .phtml-canvas {
-  width: 100%;
-  max-width: none;
-  height: 78vh;
-  min-height: 620px;
-  position: relative;
-  border-radius: 0;
-  border-top: 1px solid var(--phtml-border);
-  border-bottom: 1px solid var(--phtml-border);
-  overflow: visible;
-  background: transparent;
-}
-
-/* ── Motion rise animation (flow mode) ────────────────────────── */
-
-.motion-rise {
-  transform: translateY(60px);
-  opacity: 0;
-  transition:
-    transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 800ms ease;
-}
-
-.phtml-slide.visible .motion-rise {
-  transform: translateY(0);
-  opacity: 1;
+  outline-color: rgba(255,255,255,0.12);
 }

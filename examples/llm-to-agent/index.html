@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM to Agent — PHTML Runtime</title>
+  <link rel="stylesheet" href="../../runtime/phtml.css" />
+  <link rel="stylesheet" href="../../themes/editorial-dark.css" />
+  <style>
+    body { background: #0a0a0a; }
+
+    .phtml-slide { background: #0a0a0a; }
+
+    #smoke {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    .phtml-deck { z-index: 2; position: relative; }
+
+    .phtml-toolbar,
+    .phtml-status,
+    .phtml-hint,
+    .phtml-nav,
+    .phtml-thumbnails { z-index: 200; }
+
+    .phtml-box.title { white-space: pre-line; }
+  </style>
+</head>
+<body>
+
+  <canvas id="smoke"></canvas>
+
+  <div class="phtml-hint">E: 편집 모드 · ← →: 슬라이드 이동</div>
+  <div class="phtml-status"></div>
+
+  <main class="phtml-deck"></main>
+
+  <script src="../../runtime/phtml.js"></script>
+  <script>
+    PHTML.init({
+      deckUrl: '../../decks/llm-to-agent.json',
+      agentBridge: 'ws://localhost:8787',
+    });
+
+    // Smoke particle effect
+    const canvas = document.getElementById('smoke');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    const particles = [];
+
+    function resize() {
+      canvas.width = innerWidth * devicePixelRatio;
+      canvas.height = innerHeight * devicePixelRatio;
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+
+    function addParticle(x, y) {
+      for (let i = 0; i < 2; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 0.9,
+          vy: (Math.random() - 0.5) * 0.9,
+          r: 10 + Math.random() * 24,
+          life: 1,
+        });
+      }
+      if (particles.length > 160) particles.splice(0, particles.length - 160);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.globalCompositeOperation = 'screen';
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.98; p.vy *= 0.98;
+        p.r += 0.22; p.life -= 0.011;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        g.addColorStop(0, `rgba(255, 79, 42, ${0.04 * p.life})`);
+        g.addColorStop(0.5, `rgba(180, 40, 10, ${0.018 * p.life})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    let lastMouse = 0;
+    addEventListener('pointermove', (e) => {
+      const now = performance.now();
+      if (now - lastMouse > 24) { addParticle(e.clientX, e.clientY); lastMouse = now; }
+    });
+
+    resize();
+    addEventListener('resize', resize);
+    animate();
+
+    // Add occasional ambient particles
+    setInterval(() => {
+      if (particles.length < 40) {
+        addParticle(Math.random() * innerWidth, Math.random() * innerHeight);
+      }
+    }, 800);
+  </script>
+</body>
+</html>

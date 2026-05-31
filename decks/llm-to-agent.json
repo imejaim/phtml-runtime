@@ -1,0 +1,484 @@
+{
+  "title": "LLM to Agent",
+  "theme": "editorial-dark",
+  "slides": [
+    {
+      "boxes": [
+        {
+          "id": "s1-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "2024 → 2026 · AGENTIC ERA",
+          "x": 60,
+          "y": 56,
+          "w": 480,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s1-title",
+          "className": "phtml-box title",
+          "html": "LLM\nto Agent",
+          "x": 54,
+          "y": 140,
+          "w": 720,
+          "h": 340,
+          "style": { "fontSize": "108px" }
+        },
+        {
+          "id": "s1-subtitle",
+          "className": "phtml-box subtitle",
+          "html": "언어 모델이 행동하는 존재가 되기까지",
+          "x": 54,
+          "y": 510,
+          "w": 640,
+          "h": 60,
+          "style": {}
+        },
+        {
+          "id": "s1-pill1",
+          "className": "phtml-box pill",
+          "html": "PHTML Runtime · Live Deck",
+          "x": 860,
+          "y": 600,
+          "w": 320,
+          "h": 44,
+          "style": {}
+        },
+        {
+          "id": "s1-side-text",
+          "className": "phtml-box body",
+          "html": "브라우저에서 바로 편집·공유할 수 있는<br>에이전틱 프레젠테이션 런타임",
+          "x": 880,
+          "y": 220,
+          "w": 340,
+          "h": 140,
+          "style": { "fontSize": "16px", "borderLeft": "2px solid rgba(255,79,42,0.4)", "paddingLeft": "20px" }
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s2-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "01 · FOUNDATION",
+          "x": 60,
+          "y": 56,
+          "w": 300,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s2-title",
+          "className": "phtml-box title",
+          "html": "Language\nModel",
+          "x": 54,
+          "y": 130,
+          "w": 680,
+          "h": 280,
+          "style": { "fontSize": "96px" }
+        },
+        {
+          "id": "s2-body",
+          "className": "phtml-box body",
+          "html": "대규모 언어 모델(LLM)은 수천억 개의 파라미터로\n학습된 신경망입니다. 질문에 답하고, 글을 쓰고,\n코드를 생성하며, 추론합니다.",
+          "x": 54,
+          "y": 448,
+          "w": 560,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s2-number",
+          "className": "phtml-box number",
+          "html": "175B",
+          "x": 820,
+          "y": 140,
+          "w": 400,
+          "h": 160,
+          "style": { "fontSize": "96px" }
+        },
+        {
+          "id": "s2-number-label",
+          "className": "phtml-box eyebrow",
+          "html": "파라미터 수 (GPT-3 기준)",
+          "x": 820,
+          "y": 310,
+          "w": 380,
+          "h": 30,
+          "style": {}
+        },
+        {
+          "id": "s2-card",
+          "className": "phtml-box card",
+          "html": "<strong>Predict → Generate → Respond</strong><br><br>다음 토큰을 예측하는 과정을 반복해 텍스트를 생성합니다.",
+          "x": 820,
+          "y": 390,
+          "w": 400,
+          "h": 200,
+          "style": {}
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s3-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "02 · THE PROBLEM",
+          "x": 60,
+          "y": 56,
+          "w": 300,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s3-title",
+          "className": "phtml-box title",
+          "html": "But It\nCan't Act",
+          "x": 54,
+          "y": 130,
+          "w": 720,
+          "h": 280,
+          "style": { "fontSize": "88px" }
+        },
+        {
+          "id": "s3-body",
+          "className": "phtml-box body",
+          "html": "LLM은 텍스트를 생성할 수 있지만\n파일을 열거나, API를 호출하거나,\n브라우저를 제어하거나, 기억을 유지할 수 없습니다.",
+          "x": 54,
+          "y": 448,
+          "w": 600,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s3-pill1",
+          "className": "phtml-box pill",
+          "html": "No Memory",
+          "x": 820,
+          "y": 200,
+          "w": 200,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s3-pill2",
+          "className": "phtml-box pill",
+          "html": "No Tools",
+          "x": 820,
+          "y": 270,
+          "w": 200,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s3-pill3",
+          "className": "phtml-box pill",
+          "html": "No Planning",
+          "x": 820,
+          "y": 340,
+          "w": 200,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s3-pill4",
+          "className": "phtml-box pill",
+          "html": "No Persistence",
+          "x": 820,
+          "y": 410,
+          "w": 200,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s3-accent",
+          "className": "phtml-box accent",
+          "html": "텍스트 생성 ≠ 행동",
+          "x": 820,
+          "y": 520,
+          "w": 340,
+          "h": 60,
+          "style": {}
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s4-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "03 · THE SOLUTION",
+          "x": 60,
+          "y": 56,
+          "w": 300,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s4-title",
+          "className": "phtml-box title",
+          "html": "Agent\nLayer",
+          "x": 54,
+          "y": 130,
+          "w": 600,
+          "h": 260,
+          "style": { "fontSize": "96px" }
+        },
+        {
+          "id": "s4-body",
+          "className": "phtml-box body",
+          "html": "에이전트는 LLM 위에 도구·메모리·계획을\n추가합니다. 이제 LLM이 실제로 행동할 수 있습니다.",
+          "x": 54,
+          "y": 420,
+          "w": 560,
+          "h": 120,
+          "style": {}
+        },
+        {
+          "id": "s4-card1",
+          "className": "phtml-box card",
+          "html": "<strong>🔧 Tools</strong><br><br>bash, 브라우저, 파일시스템, API 호출",
+          "x": 700,
+          "y": 140,
+          "w": 240,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s4-card2",
+          "className": "phtml-box card",
+          "html": "<strong>🧠 Memory</strong><br><br>대화 기록, 벡터 검색, 장기 컨텍스트",
+          "x": 960,
+          "y": 140,
+          "w": 260,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s4-card3",
+          "className": "phtml-box card",
+          "html": "<strong>📋 Planning</strong><br><br>목표 분해, 단계 실행, 결과 검증",
+          "x": 700,
+          "y": 330,
+          "w": 240,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s4-card4",
+          "className": "phtml-box card",
+          "html": "<strong>🔄 Reflection</strong><br><br>오류 수정, 자기 평가, 재시도 루프",
+          "x": 960,
+          "y": 330,
+          "w": 260,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s4-accent",
+          "className": "phtml-box accent",
+          "html": "LLM + Agent Layer = 자율 시스템",
+          "x": 700,
+          "y": 530,
+          "w": 520,
+          "h": 56,
+          "style": {}
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s5-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "04 · ARCHITECTURE",
+          "x": 60,
+          "y": 56,
+          "w": 300,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s5-title",
+          "className": "phtml-box title",
+          "html": "The\nStack",
+          "x": 54,
+          "y": 130,
+          "w": 500,
+          "h": 260,
+          "style": { "fontSize": "96px" }
+        },
+        {
+          "id": "s5-body",
+          "className": "phtml-box body",
+          "html": "오케스트레이터가 LLM의 출력을 해석하고\n도구를 호출합니다. 결과를 다시 LLM에\n전달해 다음 행동을 결정합니다.",
+          "x": 54,
+          "y": 430,
+          "w": 540,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s5-code",
+          "className": "phtml-box code",
+          "html": "User\n  ↓\nOrchestrator (Agent)\n  ↓\nLLM  (claude / gpt-4o)\n  ↓\nTools (bash · browser · files)\n  ↓\nWorld",
+          "x": 680,
+          "y": 120,
+          "w": 520,
+          "h": 480,
+          "style": { "fontSize": "18px" }
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s6-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "05 · IN PRODUCTION",
+          "x": 60,
+          "y": 56,
+          "w": 340,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s6-title",
+          "className": "phtml-box title",
+          "html": "Real\nPatterns",
+          "x": 54,
+          "y": 130,
+          "w": 600,
+          "h": 240,
+          "style": { "fontSize": "88px" }
+        },
+        {
+          "id": "s6-card1",
+          "className": "phtml-box card",
+          "html": "<strong>Claude Code</strong><br><br>코드 작성·실행·수정을 자율적으로. 파일시스템과 터미널을 직접 제어합니다.",
+          "x": 54,
+          "y": 420,
+          "w": 340,
+          "h": 220,
+          "style": {}
+        },
+        {
+          "id": "s6-card2",
+          "className": "phtml-box card",
+          "html": "<strong>Cursor / Cline</strong><br><br>IDE 내장 에이전트. 코드베이스를 컨텍스트로 문제를 자율 해결합니다.",
+          "x": 420,
+          "y": 420,
+          "w": 340,
+          "h": 220,
+          "style": {}
+        },
+        {
+          "id": "s6-card3",
+          "className": "phtml-box card",
+          "html": "<strong>PHTML Agent</strong><br><br>이 발표를 생성·편집하는 에이전트. JSON 덱을 직접 조작합니다.",
+          "x": 786,
+          "y": 420,
+          "w": 440,
+          "h": 220,
+          "style": {}
+        },
+        {
+          "id": "s6-subtitle",
+          "className": "phtml-box subtitle",
+          "html": "에이전트는 이미 프로덕션에 있습니다",
+          "x": 54,
+          "y": 370,
+          "w": 700,
+          "h": 50,
+          "style": {}
+        }
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "id": "s7-eyebrow",
+          "className": "phtml-box eyebrow",
+          "html": "06 · THIS DECK",
+          "x": 60,
+          "y": 56,
+          "w": 300,
+          "h": 36,
+          "style": {}
+        },
+        {
+          "id": "s7-title",
+          "className": "phtml-box title",
+          "html": "PHTML\nRuntime",
+          "x": 54,
+          "y": 130,
+          "w": 700,
+          "h": 280,
+          "style": { "fontSize": "92px" }
+        },
+        {
+          "id": "s7-body",
+          "className": "phtml-box body",
+          "html": "이 발표 자체가 에이전트로 생성되었습니다.\nJSON 덱을 수정하면 실시간으로 반영됩니다.\n브라우저에서 바로 편집하고 공유하세요.",
+          "x": 54,
+          "y": 450,
+          "w": 600,
+          "h": 160,
+          "style": {}
+        },
+        {
+          "id": "s7-pill1",
+          "className": "phtml-box pill",
+          "html": "github.com/imejaim/phtml-runtime",
+          "x": 820,
+          "y": 200,
+          "w": 380,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s7-pill2",
+          "className": "phtml-box pill",
+          "html": "npm install phtml-runtime",
+          "x": 820,
+          "y": 270,
+          "w": 300,
+          "h": 48,
+          "style": {}
+        },
+        {
+          "id": "s7-accent",
+          "className": "phtml-box accent",
+          "html": "Edit · Drag · Export · Agent-Ready",
+          "x": 820,
+          "y": 370,
+          "w": 380,
+          "h": 56,
+          "style": {}
+        },
+        {
+          "id": "s7-number",
+          "className": "phtml-box number",
+          "html": "E",
+          "x": 960,
+          "y": 480,
+          "w": 200,
+          "h": 180,
+          "style": { "fontSize": "160px" }
+        },
+        {
+          "id": "s7-key-label",
+          "className": "phtml-box eyebrow",
+          "html": "키를 눌러 편집 모드로",
+          "x": 880,
+          "y": 660,
+          "w": 340,
+          "h": 30,
+          "style": {}
+        }
+      ]
+    }
+  ]
+}
