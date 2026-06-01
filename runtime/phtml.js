@@ -452,8 +452,8 @@
 <main class="phtml-deck"></main>
 ${toolbarHtml()}
 <div class="phtml-nav"><button onclick="prevSlide()">←</button><button onclick="nextSlide()">→</button></div>
-<script id="phtml-deck-data" type="application/json">${escapeHtml(JSON.stringify(deck))}</script>
-<script>${jsText}</script>
+<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}</script>
+<script>${escapeScriptForHtml(jsText)}</script>
 <script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });</script>
 </body>
 </html>`;
@@ -874,6 +874,21 @@ ${toolbarHtml()}
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  function escapeJsonForHtml(value) {
+    return JSON.stringify(value)
+      .replace(/&/g, '\\u0026')
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+  }
+
+  function escapeScriptForHtml(source) {
+    return String(source)
+      .replace(/<\/script/gi, '<\\/script')
+      .replace(/<!--/g, '<\\!--');
   }
 
   function slugify(value) {

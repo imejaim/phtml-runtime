@@ -1,8 +1,8 @@
 {
   "name": "phtml-runtime",
   "version": "1.0.0",
-  "description": "Agentic HTML presentation runtime — beautiful by default, editable by AI",
-  "keywords": ["presentation", "slides", "agent", "ai", "html", "runtime", "phtml"],
+  "description": "Installable editable HTML presentation runtime for humans and AI agents",
+  "keywords": ["presentation", "slides", "editable", "html", "agent", "ai", "runtime", "phtml"],
   "author": "imejaim",
   "license": "MIT",
   "main": "runtime/phtml.js",
