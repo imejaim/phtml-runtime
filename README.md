@@ -33,8 +33,8 @@ phtml --version
 ptml new llm-deck.html --type presentation --design dark-tech --title "LLM to Agent"
 ptml new llm-report.html --type report --design analyst-light --title "LLM to Agent Analysis Report"
 ptml new llm-memo.html --type document --design simple-doc --title "LLM to Agent Operating Memo"
-ptml new llm-web.html --type web --design modern --title "LLM to Agent"
-ptml new llm-immersive.html --type web --design immersive --title "LLM to Agent"
+ptml new llm-web.html --type web --title "LLM to Agent"                 # default: immersive
+ptml new llm-modern.html --type web --design modern --title "LLM to Agent"  # simpler web style
 ptml new llm-horizontal.html --type web --design horizontal --title "LLM to Agent"
 ```
 
@@ -52,8 +52,8 @@ Each output is a single HTML file:
 - `presentation`: slide/deck mode, large visual typography, arrow navigation.
 - `report`: scroll mode, executive summary, KPI cards, insight/recommendation/risk blocks.
 - `document`: scroll mode, long-form memo/spec style, readable text and callouts.
-- `web`: scroll mode, landing-page/product-page style sections. The default reading direction is vertical.
-- `web` with `--design immersive`: premium vertical scroll with reveal motion and mouse-reactive surfaces.
+- `web`: default immersive vertical scroll, landing-page/product-page style sections, reveal motion, and mouse-reactive surfaces.
+- `web` with `--design modern`: simpler landing-page style.
 - `web` with `--design horizontal`: optional sideways, PPT-like cinematic track using the mouse wheel/trackpad.
 
 ## Designs/themes
@@ -88,8 +88,8 @@ Design aliases:
 --design editorial-light # presentation-editorial-light
 --design analyst-light  # report-analyst-light
 --design simple-doc     # document-simple
---design modern         # web-modern
---design immersive      # web-immersive
+--design modern         # web-modern, simpler web style
+--design immersive      # web-immersive, also the default for --type web
 --design horizontal     # web-horizontal-cinematic
 ```
 
@@ -113,7 +113,7 @@ Serve them locally:
 ptml serve --open
 ```
 
-The default server page opens the dark-tech presentation example.
+The default server page opens the immersive web example.
 
 ## CLI
 

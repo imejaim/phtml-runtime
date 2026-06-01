@@ -38,8 +38,8 @@ const DESIGN_PRESETS = {
     aliases: { simple: 'document-simple', 'simple-doc': 'document-simple' },
   },
   web: {
-    default: 'web-modern',
-    aliases: { modern: 'web-modern', landing: 'web-modern', 'landing-modern': 'web-modern', immersive: 'web-immersive', premium: 'web-immersive', cinematic: 'web-immersive', horizontal: 'web-horizontal-cinematic', 'horizontal-cinematic': 'web-horizontal-cinematic' },
+    default: 'web-immersive',
+    aliases: { modern: 'web-modern', basic: 'web-modern', landing: 'web-immersive', 'landing-modern': 'web-modern', immersive: 'web-immersive', premium: 'web-immersive', cinematic: 'web-immersive', default: 'web-immersive', horizontal: 'web-horizontal-cinematic', 'horizontal-cinematic': 'web-horizontal-cinematic' },
   },
 };
 
@@ -254,6 +254,7 @@ function createWebDeck(title, design) {
 
 function createImmersiveWebDeck(title, design) {
   const horizontal = design === 'web-horizontal-cinematic';
+  const heroTitle = String(title).replace(/\s+to\s+/i, '<br/><em>to</em> ');
   return {
     title,
     type: 'web',
@@ -263,15 +264,15 @@ function createImmersiveWebDeck(title, design) {
     slides: [
       { boxes: [
         box('im-nav-1', 'micro-nav', 'PTML / LLM TO AGENT / 01', 64, 38, 340, 38),
-        box('im-title-1', 'immersive-title', title, 72, 124, 860, 172),
-        box('im-sub-1', 'immersive-subtitle', 'A cinematic, scroll-native template for explaining how language models become operating agents.', 78, 326, 650, 92),
+        box('im-title-1', 'immersive-title', heroTitle, 72, 112, 860, 198),
+        box('im-sub-1', 'immersive-subtitle', 'A premium scroll-native starting point for reports, product narratives, and agent-generated web documents.', 78, 326, 650, 92),
         box('im-orb-1', 'orbital-system mouse-react', '<span></span><i></i><b></b>', 760, 72, 420, 420),
         box('im-cta-1', 'magnetic-cta mouse-react', 'Scroll to enter the operating loop', 80, 516, 390, 64),
-        box('im-note-1', 'side-note', 'Vertical scroll is the default. Horizontal mode is available when the story should feel like a cinematic track.', 914, 522, 260, 102),
+        box('im-note-1', 'side-note', 'Default PTML web output: vertical scroll, editable layout, motion-ready surfaces, and one-file export.', 914, 522, 260, 102),
       ] },
       { boxes: [
-        box('im-kicker-2', 'micro-nav', '02 / FROM RESPONSE TO ACTION', 64, 44, 380, 38),
-        box('im-title-2', 'immersive-heading', 'The page moves like the agent thinks.', 72, 110, 690, 132),
+        box('im-kicker-2', 'micro-nav', '02 / SCROLL AS STORY', 64, 44, 380, 38),
+        box('im-title-2', 'immersive-heading', 'A document that feels like a product surface.', 72, 110, 760, 132),
         box('im-card-2a', 'glass-panel depth-card mouse-react', '<strong>Intent</strong><br/>The user asks for an outcome, not just an answer.', 90, 324, 330, 160),
         box('im-card-2b', 'glass-panel depth-card mouse-react', '<strong>Tools</strong><br/>The agent reads, edits, executes, browses, and verifies.', 476, 260, 330, 160),
         box('im-card-2c', 'glass-panel depth-card mouse-react', '<strong>Evidence</strong><br/>The final report shows what was actually checked.', 862, 324, 330, 160),
@@ -280,13 +281,13 @@ function createImmersiveWebDeck(title, design) {
       { boxes: [
         box('im-kicker-3', 'micro-nav', '03 / AGENT SURFACE', 64, 44, 360, 38),
         box('im-title-3', 'immersive-heading', 'Readable for humans. Structured for agents.', 72, 104, 760, 124),
-        box('im-console-3', 'agent-console mouse-react', '<code>goal.detect()</code><br/><code>context.load()</code><br/><code>tools.execute()</code><br/><code>result.verify()</code><br/><code>artifact.export()</code>', 86, 306, 430, 270),
+        box('im-console-3', 'agent-console mouse-react', '<code>goal.detect()</code><br/><code>context.load()</code><br/><code>tools.execute()</code><br/><code>motion.render()</code><br/><code>artifact.export()</code>', 86, 306, 430, 270),
         box('im-body-3', 'large-copy', 'PTML keeps the final artifact editable while preserving a stable JSON/runtime convention. That means a designer can polish it, a manager can read it, and an agent can safely modify it later.', 620, 312, 520, 210),
       ] },
       { boxes: [
         box('im-kicker-4', 'micro-nav', '04 / OUTPUT', 64, 44, 260, 38),
         box('im-title-4', 'immersive-heading', 'One file. Multiple formats. Motion included.', 72, 114, 780, 120),
-        box('im-card-4a', 'format-card mouse-react', '<b>01</b><strong>Report</strong><span>Default vertical scroll for analysis and publishing.</span>', 86, 332, 310, 190),
+        box('im-card-4a', 'format-card mouse-react', '<b>01</b><strong>Default</strong><span>Vertical immersive scroll for web documents and internal publishing.</span>', 86, 332, 310, 190),
         box('im-card-4b', 'format-card mouse-react', '<b>02</b><strong>Web</strong><span>Premium landing-page motion and mouse-reactive surfaces.</span>', 486, 286, 310, 190),
         box('im-card-4c', 'format-card mouse-react', '<b>03</b><strong>Track</strong><span>Optional horizontal scroll for PPT-like progression.</span>', 886, 332, 310, 190),
       ] },
