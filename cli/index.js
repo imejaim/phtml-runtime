@@ -7,6 +7,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const PKG_DIR = path.resolve(__dirname, '..');
+const PKG = require(path.join(PKG_DIR, 'package.json'));
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -266,10 +267,15 @@ function exportHtml(args) {
 const [,, cmd, ...rest] = process.argv;
 
 switch (cmd) {
+  case '--version':
+  case '-v':
+  case 'version':
+    console.log(PKG.version);
+    break;
   case 'serve':  serve(rest); break;
   case 'init':   init(rest); break;
   case 'new':    newStandalone(rest); break;
   case 'export': exportHtml(rest); break;
   default:
-    console.log(`phtml <command>\n\nCommands:\n  new [file.html] [--title T] [--theme name] [--force]\n                         Create one standalone editable HTML file\n  init [name]            Create a new deck project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n`);
+    console.log(`phtml <command>\n\nCommands:\n  new [file.html] [--title T] [--theme name] [--force]\n                         Create one standalone editable HTML file\n  init [name]            Create a new deck project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  version, --version     Print installed version\n`);
 }

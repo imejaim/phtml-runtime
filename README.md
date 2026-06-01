@@ -64,8 +64,11 @@ npm install -g git+ssh://git@github.com/your-org/phtml-runtime.git
 After install:
 
 ```bash
+phtml --version
 phtml new my-talk.html --title "My Talk"
 ```
+
+The package also installs `ptml` as a typo-friendly alias, so `ptml --version` works too.
 
 ---
 
@@ -157,6 +160,9 @@ phtml export <deck.json>
 
 phtml serve [--port N] [--open]
     Start the built-in example server.
+
+phtml --version
+    Print the installed version. `ptml --version` is also supported as an alias.
 ```
 
 ---
@@ -368,8 +374,11 @@ npm install -g git+ssh://git@github.com/your-org/phtml-runtime.git
 설치 후:
 
 ```bash
+phtml --version
 phtml new my-talk.html --title "My Talk"
 ```
+
+오타 방지용 alias로 `ptml`도 함께 설치되므로 `ptml --version`도 동작합니다.
 
 ---
 
@@ -461,6 +470,9 @@ phtml export <deck.json>
 
 phtml serve [--port N] [--open]
     내장 예제 서버를 시작합니다.
+
+phtml --version
+    설치된 버전을 출력합니다. alias인 `ptml --version`도 지원합니다.
 ```
 
 ---
