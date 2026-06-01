@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LLM to Agent Operating Memo</title>
+<style>:root {
+  --phtml-bg: #0f172a;
+  --phtml-panel: rgba(15, 23, 42, 0.88);
+  --phtml-text: #f8fafc;
+  --phtml-muted: #94a3b8;
+  --phtml-accent: #38bdf8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--phtml-text);
+  overflow: hidden;
+  user-select: none;
+}
+
+.phtml-deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.phtml-slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.phtml-slide.active { display: block; }
+
+.phtml-canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: top left;
+}
+
+.phtml-canvas {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.phtml-box {
+  position: absolute;
+  min-width: 80px;
+  min-height: 36px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  user-select: text;
+  white-space: pre-wrap;
+}
+
+body.phtml-edit-mode .phtml-box {
+  outline: 1.5px dashed rgba(56, 189, 248, 0.38);
+  cursor: move;
+}
+
+body.phtml-edit-mode .phtml-box.selected {
+  outline: 3px solid rgba(56, 189, 248, 0.95);
+  background-color: rgba(56, 189, 248, 0.08);
+}
+
+body.phtml-edit-mode .phtml-box.phtml-text-overflow::after {
+  content: '↕';
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: #f97316;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.phtml-resize-handle {
+  display: none;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  right: -7px;
+  bottom: -7px;
+  background: var(--phtml-accent);
+  border-radius: 50%;
+  border: 2px solid #020617;
+  cursor: nwse-resize;
+  z-index: 10;
+}
+
+body.phtml-edit-mode .phtml-box.selected .phtml-resize-handle { display: block; }
+
+.phtml-toolbar {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  display: none;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: var(--phtml-panel);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(16px);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 24px);
+}
+
+body.phtml-edit-mode .phtml-toolbar { display: flex; }
+
+.phtml-tb-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.phtml-tb-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--phtml-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.phtml-tb-section > *:not(.phtml-tb-label) {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.phtml-tb-sep {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.phtml-tb-color-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--phtml-muted);
+  cursor: pointer;
+}
+
+.phtml-toolbar button,
+.phtml-toolbar input[type="number"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.phtml-toolbar input[type="color"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  border-radius: 6px;
+  width: 26px;
+  height: 22px;
+  padding: 1px 2px;
+  cursor: pointer;
+}
+
+.phtml-toolbar input[type="number"] { width: 64px; }
+
+.phtml-toolbar button {
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.phtml-toolbar button kbd {
+  font-size: 10px;
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.phtml-toolbar button:hover { background: rgba(56, 189, 248, 0.22); }
+
+.phtml-tb-exit {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+  align-self: center;
+}
+
+.phtml-tb-exit:hover { background: rgba(239, 68, 68, 0.28) !important; }
+
+.phtml-thumbnails {
+  position: fixed;
+  z-index: 90;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+body.phtml-edit-mode .phtml-thumbnails { display: none; }
+
+.phtml-thumb {
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms, border-color 120ms;
+}
+
+.phtml-thumb.active {
+  border-color: var(--phtml-accent);
+  color: var(--phtml-accent);
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.phtml-status,
+.phtml-hint {
+  position: fixed;
+  z-index: 90;
+  color: var(--phtml-muted);
+  font-size: 14px;
+  background: rgba(15, 23, 42, 0.64);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.phtml-status { top: 18px; right: 20px; }
+.phtml-hint { top: 20px; left: 24px; }
+
+.phtml-nav {
+  position: fixed;
+  bottom: 14px;
+  right: 28px;
+  display: flex;
+  gap: 8px;
+  z-index: 90;
+}
+
+.phtml-nav button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+[contenteditable="true"] { cursor: text; }
+
+@media (max-width: 760px) {
+  .phtml-toolbar { bottom: 46px; }
+  .phtml-hint { display: none; }
+}
+
+@media print {
+  body { overflow: visible; background: white; }
+  .phtml-toolbar, .phtml-nav, .phtml-hint, .phtml-status, .phtml-resize-handle, .phtml-thumbnails { display: none !important; }
+  .phtml-deck { height: auto; overflow: visible; }
+  .phtml-slide {
+    display: block !important;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    page-break-after: always;
+  }
+  .phtml-canvas-wrapper { transform: none !important; position: relative !important; width: 100% !important; height: 100vh !important; }
+  .phtml-canvas { width: 100% !important; height: 100% !important; }
+}
+
+/* PTML — Document Simple */
+:root {
+  --phtml-bg: #fbfaf7;
+  --phtml-panel: rgba(255,255,255,0.9);
+  --phtml-text: #181713;
+  --phtml-muted: #706d64;
+  --phtml-accent: #8b5cf6;
+  --phtml-border: rgba(24,23,19,.12);
+  --phtml-radius: 14px;
+  --phtml-radius-lg: 22px;
+}
+body { background: var(--phtml-bg); color: var(--phtml-text); }
+.phtml-slide { background: transparent; }
+.phtml-canvas { background: transparent; border-radius: 0; overflow: visible; }
+.phtml-deck.flow .phtml-slide { padding: 6vh 7vw; }
+.phtml-box { color: var(--phtml-text); }
+.phtml-box.doc-title { font-size: 54px; line-height: 1.05; letter-spacing: -.035em; font-weight: 820; }
+.phtml-box.doc-meta { color: var(--phtml-muted); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; font-weight: 720; }
+.phtml-box.doc-heading { font-size: 40px; font-weight: 820; letter-spacing: -.025em; border-bottom: 1px solid var(--phtml-border); }
+.phtml-box.doc-body { font-size: 21px; line-height: 1.75; color: #34312a; }
+.phtml-box.doc-body h2 { margin: 0 0 12px; font-size: 26px; line-height: 1.2; letter-spacing: -.02em; color: var(--phtml-text); }
+.phtml-box.doc-body p { margin: 0 0 18px; }
+.phtml-box.doc-body ul { margin: 0; padding-left: 1.15em; }
+.phtml-box.doc-body li { margin: 0 0 12px; }
+.phtml-box.callout, .phtml-box.quote {
+  background: #fff; border: 1px solid var(--phtml-border); border-radius: 22px; padding: 25px 28px; box-shadow: 0 18px 50px rgba(24,23,19,.07); font-size: 19px; line-height: 1.55; color: #464238;
+}
+.phtml-box.callout { border-left: 6px solid var(--phtml-accent); }
+.phtml-box.quote { font-family: Georgia, 'Times New Roman', serif; font-size: 27px; line-height: 1.35; color: #2d2922; }
+.phtml-box.quote::before { content: '“'; display: block; color: var(--phtml-accent); font-size: 58px; line-height: .6; }
+.phtml-status, .phtml-hint, .phtml-thumbnails { background: rgba(255,255,255,.82); color: var(--phtml-muted); border-color: var(--phtml-border); }
+.phtml-thumb.active { border-color: var(--phtml-accent); color: var(--phtml-accent); background: rgba(139,92,246,.12); }
+@media print { body { background: white; } .phtml-box.doc-body { color: #111; } }
+</style>
+</head>
+<body class="ptml-document">
+<div class="phtml-hint">E: edit · scroll: read · Export HTML: share as one file</div>
+<div class="phtml-status"></div>
+<main class="phtml-deck flow"></main>
+<script id="phtml-deck-data" type="application/json">{"title":"LLM to Agent Operating Memo","type":"document","mode":"scroll","theme":"document-simple","slides":[{"boxes":[{"id":"d-title-1","className":"phtml-box doc-title","html":"LLM to Agent Operating Memo","x":120,"y":86,"w":850,"h":98},{"id":"d-meta-1","className":"phtml-box doc-meta","html":"Simple document · LLM to Agent · editable PTML","x":122,"y":204,"w":640,"h":40},{"id":"d-body-1","className":"phtml-box doc-body","html":"\u003ch2\u003ePurpose\u003c/h2\u003e\u003cp\u003eThis document explains the practical difference between an LLM that answers and an agent that performs work. It is designed for long-form reading, not slide performance.\u003c/p\u003e\u003ch2\u003eCore idea\u003c/h2\u003e\u003cp\u003eThe agent layer adds tools, state inspection, verification, and a delivery surface. PTML keeps that delivery surface editable so the final document can still be adjusted by a human.\u003c/p\u003e","x":120,"y":286,"w":840,"h":260},{"id":"d-callout-1","className":"phtml-box callout","html":"\u003cstrong\u003eDocument mode\u003c/strong\u003e\u003cbr/\u003eBest for memos, specs, internal notes, and report drafts.","x":990,"y":286,"w":210,"h":166}]},{"boxes":[{"id":"d-title-2","className":"phtml-box doc-heading","html":"Checklist","x":120,"y":82,"w":520,"h":72},{"id":"d-body-2","className":"phtml-box doc-body","html":"\u003cul\u003e\u003cli\u003eClarify intent and constraints.\u003c/li\u003e\u003cli\u003eInspect existing project state.\u003c/li\u003e\u003cli\u003eUse tools instead of pretending.\u003c/li\u003e\u003cli\u003eVerify with real outputs.\u003c/li\u003e\u003cli\u003eSummarize evidence and next decisions.\u003c/li\u003e\u003c/ul\u003e\u003cp\u003eThe same editable document can become a memo, an appendix, or a published internal note.\u003c/p\u003e","x":120,"y":190,"w":760,"h":300},{"id":"d-quote-2","className":"phtml-box quote","html":"“The difference between response and operation is verified action.”","x":930,"y":198,"w":250,"h":210}]}]}</script>
+<script>// PHTML Runtime v1.0
+
+(function () {
+  const CANVAS_W = 1280;
+  const CANVAS_H = 720;
+  const GRID = 8;
+
+  const state = {
+    deck: null,
+    currentSlide: 0,
+    editMode: false,
+    selectedBox: null,
+    dragState: null,
+    resizeState: null,
+    ws: null,
+    wsUrl: null,
+    wsBackoff: 1000,
+    wsReconnectTimer: null,
+    commandQueue: [],
+    intersectionObserver: null,
+  };
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const snap = (value) => Math.round(value / GRID) * GRID;
+
+  function uid(prefix = 'box') {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  function px(value, fallback = 0) {
+    if (typeof value === 'number') return `${value}px`;
+    if (typeof value === 'string') return value;
+    return `${fallback}px`;
+  }
+
+  function currentCanvas() {
+    return $('.phtml-slide.active .phtml-canvas');
+  }
+
+  function getSlides() {
+    return $$('.phtml-slide');
+  }
+
+  function updateStatus() {
+    const status = $('.phtml-status');
+    const slides = getSlides();
+    if (status) status.textContent = `${state.editMode ? 'Edit' : 'Present'} · ${state.currentSlide + 1}/${Math.max(slides.length, 1)}`;
+  }
+
+  function scaleCanvas() {
+    const deckEl = $('.phtml-deck');
+    if (!deckEl) return;
+    const isFlow = deckEl.classList.contains('flow');
+    if (isFlow) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const scale = Math.min(vw / CANVAS_W, vh / CANVAS_H);
+    const scaledW = CANVAS_W * scale;
+    const scaledH = CANVAS_H * scale;
+    const offsetX = (vw - scaledW) / 2;
+    const offsetY = (vh - scaledH) / 2;
+    $$('.phtml-canvas-wrapper').forEach((wrapper) => {
+      wrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+      wrapper.style.transformOrigin = 'top left';
+      wrapper.style.width = CANVAS_W + 'px';
+      wrapper.style.height = CANVAS_H + 'px';
+      wrapper.style.position = 'absolute';
+      wrapper.style.top = '0';
+      wrapper.style.left = '0';
+    });
+  }
+
+  function showSlide(index) {
+    const slides = getSlides();
+    if (!slides.length) return;
+    state.currentSlide = clamp(index, 0, slides.length - 1);
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === state.currentSlide));
+    state.selectedBox = null;
+    updateSelectedUI();
+    updateStatus();
+    updateThumbnails();
+    emitEvent({ type: 'slide_changed', index: state.currentSlide });
+  }
+
+  function nextSlide() {
+    if (!state.editMode) showSlide(state.currentSlide + 1);
+  }
+
+  function prevSlide() {
+    if (!state.editMode) showSlide(state.currentSlide - 1);
+  }
+
+  function ensureHandle(box) {
+    if (!$(':scope > .phtml-resize-handle', box)) {
+      const handle = document.createElement('span');
+      handle.className = 'phtml-resize-handle';
+      handle.contentEditable = 'false';
+      box.appendChild(handle);
+    }
+  }
+
+  function createBox(boxData = {}) {
+    const box = document.createElement('div');
+    box.className = boxData.className || `phtml-box ${boxData.type || 'body'}`;
+    box.dataset.id = boxData.id || uid();
+    box.innerHTML = (boxData.html != null) ? boxData.html : escapeHtml(boxData.text || '');
+    box.style.left = px(boxData.x ?? boxData.left, 80);
+    box.style.top = px(boxData.y ?? boxData.top, 100);
+    box.style.width = px(boxData.w ?? boxData.width, 420);
+    box.style.height = px(boxData.h ?? boxData.height, 90);
+    if (boxData.style) Object.assign(box.style, boxData.style);
+    if (boxData.zIndex !== undefined) box.style.zIndex = boxData.zIndex;
+    box.setAttribute('contenteditable', state.editMode ? 'true' : 'false');
+    ensureHandle(box);
+    return box;
+  }
+
+  function renderDeck(deck) {
+    state.deck = deck || { title: 'Untitled', slides: [] };
+    document.title = state.deck.title || 'PHTML Deck';
+    const deckEl = $('.phtml-deck');
+    if (!deckEl) throw new Error('Missing .phtml-deck element');
+    deckEl.innerHTML = '';
+    const isFlow = deckEl.classList.contains('flow');
+
+    (state.deck.slides || []).forEach((slideData, index) => {
+      const slide = document.createElement('section');
+      slide.className = `phtml-slide${index === 0 ? ' active' : ''}`;
+      const canvas = document.createElement('div');
+      canvas.className = 'phtml-canvas';
+      (slideData.boxes || []).forEach((boxData) => canvas.appendChild(createBox(boxData)));
+
+      if (isFlow) {
+        slide.appendChild(canvas);
+      } else {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'phtml-canvas-wrapper';
+        wrapper.appendChild(canvas);
+        slide.appendChild(wrapper);
+      }
+      deckEl.appendChild(slide);
+    });
+
+    if (!(state.deck.slides || []).length) addSlide();
+    state.currentSlide = 0;
+    bindBoxEvents();
+    setupIntersectionObserver();
+    showSlide(0);
+    buildThumbnailStrip();
+    if (!isFlow) scaleCanvas();
+    if (state.deck.theme) setTheme(state.deck.theme);
+  }
+
+  async function loadDeck(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to load deck: ${url}`);
+    renderDeck(await response.json());
+  }
+
+  function collectBoxFromElement(box) {
+    const clone = box.cloneNode(true);
+    $$('.phtml-resize-handle', clone).forEach((h) => h.remove());
+    return {
+      id: box.dataset.id || uid(),
+      className: box.className.replace(/\s*selected\s*/g, ' ').trim(),
+      html: clone.innerHTML,
+      x: parseFloat(box.style.left) || 0,
+      y: parseFloat(box.style.top) || 0,
+      w: parseFloat(box.style.width) || box.offsetWidth,
+      h: parseFloat(box.style.height) || box.offsetHeight,
+      style: {
+        fontSize: box.style.fontSize || '',
+        fontWeight: box.style.fontWeight || '',
+        textAlign: box.style.textAlign || '',
+        color: box.style.color || '',
+        background: box.style.background || '',
+        zIndex: box.style.zIndex || '',
+      },
+    };
+  }
+
+  function collectDeck() {
+    return {
+      title: state.deck?.title || document.title || 'PHTML Deck',
+      theme: state.deck?.theme || 'dark-tech',
+      slides: getSlides().map((slide) => ({
+        boxes: $$('.phtml-canvas > .phtml-box', slide).map((box) => collectBoxFromElement(box)),
+      })),
+    };
+  }
+
+  function toggleEdit() {
+    state.editMode = !state.editMode;
+    document.body.classList.toggle('phtml-edit-mode', state.editMode);
+    $$('.phtml-box').forEach((box) => box.setAttribute('contenteditable', state.editMode ? 'true' : 'false'));
+    if (!state.editMode) {
+      state.selectedBox = null;
+      updateSelectedUI();
+    }
+    const toolbar = $('.phtml-toolbar');
+    if (toolbar) {
+      if (state.editMode) {
+        toolbar.style.opacity = '0';
+        toolbar.style.transform = toolbar.classList.contains('side-panel')
+          ? 'translateX(20px)'
+          : 'translateX(-50%) translateY(12px)';
+        requestAnimationFrame(() => {
+          toolbar.style.transition = 'opacity 220ms ease, transform 220ms ease';
+          toolbar.style.opacity = '1';
+          toolbar.style.transform = toolbar.classList.contains('side-panel')
+            ? 'translateX(0)'
+            : 'translateX(-50%) translateY(0)';
+        });
+      } else {
+        toolbar.style.transition = '';
+        toolbar.style.opacity = '';
+        toolbar.style.transform = '';
+      }
+    }
+    updateStatus();
+  }
+
+  function selectBox(box) {
+    if (!state.editMode || !box) return;
+    state.selectedBox = box;
+    updateSelectedUI();
+    syncToolbarToBox(box);
+  }
+
+  function syncToolbarToBox(box) {
+    const sizeInput = $('#phtml-fontSize');
+    const colorInput = $('#phtml-colorPicker');
+    const bgInput = $('#phtml-boxBg');
+    const computed = getComputedStyle(box);
+    if (sizeInput) sizeInput.value = parseInt(computed.fontSize, 10);
+    if (colorInput) colorInput.value = rgbToHex(computed.color);
+    if (bgInput) bgInput.value = rgbToHex(computed.backgroundColor);
+  }
+
+  function updateSelectedUI() {
+    $$('.phtml-box').forEach((box) => box.classList.remove('selected'));
+    if (state.selectedBox) {
+      state.selectedBox.classList.add('selected');
+      measureTextOverflow(state.selectedBox);
+    }
+  }
+
+  function requireSelected() {
+    if (!state.selectedBox) {
+      alert('Select a box first.');
+      return false;
+    }
+    return true;
+  }
+
+  function measureTextOverflow(box) {
+    box.classList.remove('phtml-text-overflow');
+    const offscreenCanvas = document.createElement('canvas');
+    const ctx = offscreenCanvas.getContext('2d');
+    const computed = getComputedStyle(box);
+    const fontSize = parseFloat(computed.fontSize);
+    const lineHeight = parseFloat(computed.lineHeight) || fontSize * 1.4;
+    ctx.font = `${computed.fontWeight} ${fontSize}px ${computed.fontFamily}`;
+    const boxW = box.offsetWidth - parseFloat(computed.paddingLeft) - parseFloat(computed.paddingRight);
+    const text = box.textContent || '';
+    let lines = 0;
+    for (const paragraph of text.split('\n')) {
+      const words = paragraph.split(' ');
+      let line = '';
+      for (const word of words) {
+        const test = line ? line + ' ' + word : word;
+        if (ctx.measureText(test).width > boxW && line) {
+          lines++;
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      lines++;
+    }
+    const totalH = lines * lineHeight;
+    const availH = box.offsetHeight - parseFloat(computed.paddingTop) - parseFloat(computed.paddingBottom);
+    if (totalH > availH) box.classList.add('phtml-text-overflow');
+  }
+
+  function addSlide(slideData) {
+    const deckEl = $('.phtml-deck');
+    const isFlow = deckEl.classList.contains('flow');
+    const slide = document.createElement('section');
+    slide.className = 'phtml-slide';
+    const canvas = document.createElement('div');
+    canvas.className = 'phtml-canvas';
+    if (slideData && slideData.boxes) {
+      slideData.boxes.forEach((boxData) => canvas.appendChild(createBox(boxData)));
+    }
+    if (isFlow) {
+      slide.appendChild(canvas);
+    } else {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'phtml-canvas-wrapper';
+      wrapper.appendChild(canvas);
+      slide.appendChild(wrapper);
+    }
+    deckEl.appendChild(slide);
+    setupIntersectionObserver();
+    showSlide(getSlides().length - 1);
+    buildThumbnailStrip();
+    if (!isFlow) scaleCanvas();
+  }
+
+  function deleteSlide(index) {
+    const slides = getSlides();
+    if (slides.length <= 1) return;
+    const target = slides[index !== undefined ? index : state.currentSlide];
+    if (!target) return;
+    target.remove();
+    showSlide(clamp(state.currentSlide, 0, getSlides().length - 1));
+    buildThumbnailStrip();
+  }
+
+  function addBox(boxData) {
+    const canvas = currentCanvas();
+    if (!canvas) return;
+    const box = createBox(boxData || { text: 'New Box', type: 'body', x: 90, y: 120, w: 420, h: 90, style: { fontSize: '28px' } });
+    canvas.appendChild(box);
+    bindBoxEvents();
+    selectBox(box);
+    box.focus();
+  }
+
+  function duplicateBox() {
+    if (!requireSelected()) return;
+    const data = collectBoxFromElement(state.selectedBox);
+    data.x += 30;
+    data.y += 30;
+    data.id = uid();
+    addBox(data);
+  }
+
+  function deleteBox() {
+    if (!requireSelected()) return;
+    state.selectedBox.remove();
+    state.selectedBox = null;
+    updateSelectedUI();
+  }
+
+  function bringForward() {
+    if (!requireSelected()) return;
+    state.selectedBox.style.zIndex = String((parseInt(state.selectedBox.style.zIndex || '1', 10)) + 1);
+  }
+
+  function sendBackward() {
+    if (!requireSelected()) return;
+    state.selectedBox.style.zIndex = String(Math.max(0, (parseInt(state.selectedBox.style.zIndex || '1', 10)) - 1));
+  }
+
+  function setFontSize(value) {
+    if (!requireSelected()) return;
+    state.selectedBox.style.fontSize = `${value}px`;
+  }
+
+  function adjustFontSize(delta) {
+    if (!requireSelected()) return;
+    const size = parseInt(getComputedStyle(state.selectedBox).fontSize, 10);
+    const next = clamp(size + delta, 8, 180);
+    state.selectedBox.style.fontSize = `${next}px`;
+    const input = $('#phtml-fontSize');
+    if (input) input.value = next;
+  }
+
+  function toggleBold() {
+    if (!requireSelected()) return;
+    const weight = parseInt(getComputedStyle(state.selectedBox).fontWeight, 10);
+    state.selectedBox.style.fontWeight = weight >= 700 ? '400' : '800';
+  }
+
+  function setAlign(align) {
+    if (!requireSelected()) return;
+    state.selectedBox.style.textAlign = align;
+  }
+
+  function setColor(color) {
+    if (!requireSelected()) return;
+    state.selectedBox.style.color = color;
+  }
+
+  function setBoxBackground(color) {
+    if (!requireSelected()) return;
+    state.selectedBox.style.background = color;
+  }
+
+  function setBackground(color) {
+    const canvas = currentCanvas();
+    if (canvas) canvas.style.background = color;
+  }
+
+  function setStyle(id, styleObj) {
+    const box = $(`.phtml-box[data-id="${id}"]`);
+    if (!box || !styleObj) return;
+    Object.assign(box.style, styleObj);
+  }
+
+  function setTheme(name) {
+    let link = $('#phtml-theme-link');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'phtml-theme-link';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    const existingThemeLink = $$('link[rel="stylesheet"]').find(
+      (l) => l.href && (l.href.includes('/themes/') || l.href.includes('dark-tech') || l.href.includes('editorial'))
+    );
+    const base = existingThemeLink
+      ? existingThemeLink.href.replace(/\/[^/]+\.css(\?.*)?$/, '/')
+      : '../themes/';
+    link.href = base + name + '.css';
+    if (state.deck) state.deck.theme = name;
+  }
+
+  function saveJSON() {
+    const deck = collectDeck();
+    downloadText('phtml-deck.json', JSON.stringify(deck, null, 2), 'application/json');
+    emitEvent({ type: 'deck_saved', deck });
+  }
+
+  function loadJSONFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => renderDeck(JSON.parse(reader.result));
+    reader.readAsText(file);
+  }
+
+  async function exportSingleFile() {
+    const deck = collectDeck();
+    const cssText = await collectCssText();
+    const jsText = await fetchScriptText();
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${escapeHtml(deck.title)}</title>
+<style>${cssText}</style>
+</head>
+<body>
+<div class="phtml-hint">E: edit mode · arrows: navigate</div>
+<div class="phtml-status">Presentation Mode</div>
+<main class="phtml-deck"></main>
+${toolbarHtml()}
+<div class="phtml-nav"><button onclick="prevSlide()">←</button><button onclick="nextSlide()">→</button></div>
+<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}<\/script>
+<script>${escapeScriptForHtml(jsText)}<\/script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });<\/script>
+</body>
+</html>`;
+    downloadText(`${slugify(deck.title)}.html`, html, 'text/html');
+  }
+
+  async function collectCssText() {
+    let css = '';
+    for (const sheet of [...document.styleSheets]) {
+      try {
+        css += [...sheet.cssRules].map((rule) => rule.cssText).join('\n') + '\n';
+      } catch (_) {
+        if (sheet.href) {
+          try { css += await (await fetch(sheet.href)).text() + '\n'; } catch (_) {}
+        }
+      }
+    }
+    return css;
+  }
+
+  async function fetchScriptText() {
+    const current = $$('script[src]').find((s) => s.src.includes('phtml.js'));
+    if (!current) return document.currentScript?.textContent || '';
+    return await (await fetch(current.src)).text();
+  }
+
+  function connectAgentBridge(url = 'ws://localhost:8787') {
+    if (!('WebSocket' in window)) {
+      console.warn('[PHTML] WebSocket not supported.');
+      return;
+    }
+    state.wsUrl = url;
+    state.wsBackoff = 1000;
+    openWs();
+  }
+
+  function openWs() {
+    if (state.wsReconnectTimer) {
+      clearTimeout(state.wsReconnectTimer);
+      state.wsReconnectTimer = null;
+    }
+    try {
+      state.ws = new WebSocket(state.wsUrl);
+    } catch (e) {
+      scheduleWsReconnect();
+      return;
+    }
+    state.ws.onopen = () => {
+      console.info('[PHTML] Agent bridge connected:', state.wsUrl);
+      state.wsBackoff = 1000;
+      while (state.commandQueue.length) {
+        handleAgentCommand(state.commandQueue.shift());
+      }
+    };
+    state.ws.onmessage = (event) => {
+      try { handleAgentCommand(JSON.parse(event.data)); }
+      catch (error) { console.error('[PHTML] Invalid agent command', error); }
+    };
+    state.ws.onclose = () => {
+      console.info('[PHTML] Agent bridge closed, reconnecting…');
+      scheduleWsReconnect();
+    };
+    state.ws.onerror = () => {
+      state.ws.close();
+    };
+  }
+
+  function scheduleWsReconnect() {
+    if (!state.wsUrl) return;
+    state.wsReconnectTimer = setTimeout(() => {
+      state.wsBackoff = Math.min(state.wsBackoff * 2, 30000);
+      openWs();
+    }, state.wsBackoff);
+  }
+
+  function emitEvent(payload) {
+    if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+      state.ws.send(JSON.stringify(payload));
+    }
+  }
+
+  function handleAgentCommand(command) {
+    if (!command || !command.type) return;
+    if (state.ws && state.ws.readyState !== WebSocket.OPEN) {
+      state.commandQueue.push(command);
+      return;
+    }
+    switch (command.type) {
+      case 'insert_box':
+        addBox(command.box || command);
+        break;
+      case 'replace_deck':
+        renderDeck(command.deck);
+        break;
+      case 'goto_slide':
+        showSlide(command.index || 0);
+        break;
+      case 'add_slide':
+        addSlide(command.slide);
+        break;
+      case 'delete_slide':
+        deleteSlide(command.index);
+        break;
+      case 'set_text':
+        if (command.id) {
+          const box = $(`.phtml-box[data-id="${command.id}"]`);
+          if (box) box.innerHTML = escapeHtml(command.text || '');
+        }
+        break;
+      case 'set_style':
+        if (command.id) setStyle(command.id, command.style);
+        break;
+      case 'set_theme':
+        if (command.name) setTheme(command.name);
+        break;
+    }
+  }
+
+  function setupIntersectionObserver(scrollRoot) {
+    if (state.intersectionObserver) state.intersectionObserver.disconnect();
+    const observerOpts = { threshold: 0.5 };
+    if (scrollRoot) observerOpts.root = scrollRoot;
+    state.intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('visible', entry.isIntersecting);
+        if (entry.isIntersecting) {
+          const slides = getSlides();
+          const index = slides.indexOf(entry.target);
+          if (index !== -1 && index !== state.currentSlide) {
+            state.currentSlide = index;
+            updateStatus();
+            updateThumbnails();
+            emitEvent({ type: 'slide_changed', index: state.currentSlide });
+          }
+        }
+      });
+    }, observerOpts);
+    getSlides().forEach((s) => state.intersectionObserver.observe(s));
+  }
+
+  function setupScrollMode() {
+    const deckEl = $('.phtml-deck');
+    if (!deckEl) return;
+
+    // Use inline setProperty('...', 'important') to reliably override phtml.css
+    const sp = (el, prop, val) => el.style.setProperty(prop, val, 'important');
+
+    // body = scroll container
+    sp(document.documentElement, 'overflow', 'hidden');
+    sp(document.body, 'overflow-y', 'scroll');
+    sp(document.body, 'scroll-snap-type', 'y mandatory');
+    sp(document.body, 'scrollbar-width', 'none');
+    sp(document.body, 'height', '100vh');
+
+    // deck: normal block flow so slides stack vertically
+    sp(deckEl, 'position', 'relative');
+    sp(deckEl, 'overflow', 'visible');
+    sp(deckEl, 'height', 'auto');
+    sp(deckEl, 'width', '100%');
+    sp(deckEl, 'inset', 'auto');
+
+    // Each slide: break out of absolute positioning, become flow element
+    const slides = getSlides();
+    slides.forEach((slide) => {
+      sp(slide, 'position', 'relative');
+      sp(slide, 'inset', 'auto');
+      sp(slide, 'display', 'flex');
+      sp(slide, 'width', '100%');
+      sp(slide, 'height', '100vh');
+      sp(slide, 'scroll-snap-align', 'start');
+      sp(slide, 'scroll-snap-stop', 'always');
+      sp(slide, 'overflow', 'hidden');
+      sp(slide, 'flex-shrink', '0');
+    });
+
+    // Also add webkit scrollbar hide via stylesheet
+    const st = document.createElement('style');
+    st.textContent = 'body::-webkit-scrollbar{display:none}';
+    document.head.appendChild(st);
+
+    // Reset to slide 0
+    state.currentSlide = 0;
+    slides.forEach((s, i) => s.classList.toggle('active', i === 0));
+    if (slides[0]) slides[0].classList.add('visible');
+    document.body.scrollTop = 0;
+    updateStatus();
+    updateThumbnails();
+
+    // IntersectionObserver with viewport root (body scroll)
+    setupIntersectionObserver(null);
+
+    // Override navigation to scroll instead of toggle display
+    const _showSlide = showSlide;
+    state.scrollMode = true;
+    window.PHTML.showSlide = (index) => {
+      const slides = getSlides();
+      const target = slides[clamp(index, 0, slides.length - 1)];
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    window.showSlide = window.PHTML.showSlide;
+    window.PHTML.nextSlide = () => {
+      const slides = getSlides();
+      window.PHTML.showSlide(state.currentSlide + 1);
+    };
+    window.PHTML.prevSlide = () => {
+      window.PHTML.showSlide(state.currentSlide - 1);
+    };
+    window.nextSlide = window.PHTML.nextSlide;
+    window.prevSlide = window.PHTML.prevSlide;
+  }
+
+  function bindBoxEvents() {
+    $$('.phtml-box').forEach(ensureHandle);
+  }
+
+  function buildThumbnailStrip() {
+    let strip = $('.phtml-thumbnails');
+    if (!strip) {
+      strip = document.createElement('div');
+      strip.className = 'phtml-thumbnails';
+      document.body.appendChild(strip);
+    }
+    strip.innerHTML = '';
+    getSlides().forEach((slide, i) => {
+      const thumb = document.createElement('button');
+      thumb.className = `phtml-thumb${i === state.currentSlide ? ' active' : ''}`;
+      thumb.textContent = i + 1;
+      thumb.title = `Slide ${i + 1}`;
+      thumb.onclick = () => showSlide(i);
+      strip.appendChild(thumb);
+    });
+  }
+
+  function updateThumbnails() {
+    $$('.phtml-thumb').forEach((t, i) => t.classList.toggle('active', i === state.currentSlide));
+  }
+
+  document.addEventListener('mousedown', (event) => {
+    if (!state.editMode) return;
+
+    const handle = event.target.closest('.phtml-resize-handle');
+    if (handle) {
+      event.preventDefault();
+      const box = handle.closest('.phtml-box');
+      selectBox(box);
+      const wrapper = box.closest('.phtml-canvas-wrapper');
+      const scale = wrapper ? wrapper.getBoundingClientRect().width / CANVAS_W : 1;
+      state.resizeState = {
+        box,
+        startX: event.clientX,
+        startY: event.clientY,
+        startW: parseFloat(box.style.width) || box.offsetWidth,
+        startH: parseFloat(box.style.height) || box.offsetHeight,
+        scale,
+      };
+      return;
+    }
+
+    const box = event.target.closest('.phtml-box');
+    if (box) {
+      selectBox(box);
+      const wrapper = box.closest('.phtml-canvas-wrapper');
+      const scale = wrapper ? wrapper.getBoundingClientRect().width / CANVAS_W : 1;
+      state.dragState = {
+        box,
+        scale,
+        startX: event.clientX,
+        startY: event.clientY,
+        startLeft: parseFloat(box.style.left) || 0,
+        startTop: parseFloat(box.style.top) || 0,
+        moved: false,
+      };
+      return;
+    }
+
+    const canvas = event.target.closest('.phtml-canvas');
+    if (canvas && event.detail === 2) {
+      const wrapper = canvas.closest('.phtml-canvas-wrapper');
+      const rect = canvas.getBoundingClientRect();
+      const scale = wrapper ? wrapper.getBoundingClientRect().width / CANVAS_W : 1;
+      const x = snap((event.clientX - rect.left) / scale - 210);
+      const y = snap((event.clientY - rect.top) / scale - 45);
+      addBox({ text: 'New Box', type: 'body', x, y, w: 420, h: 90, style: { fontSize: '28px' } });
+    }
+
+    if (!event.target.closest('.phtml-box') && !event.target.closest('.phtml-toolbar')) {
+      state.selectedBox = null;
+      updateSelectedUI();
+    }
+  });
+
+  document.addEventListener('mousemove', (event) => {
+    if (state.resizeState) {
+      const r = state.resizeState;
+      const dx = (event.clientX - r.startX) / r.scale;
+      const dy = (event.clientY - r.startY) / r.scale;
+      const newW = Math.max(80, event.shiftKey ? snap(r.startW + dx) : r.startW + dx);
+      const newH = Math.max(36, event.shiftKey ? snap(r.startH + dy) : r.startH + dy);
+      r.box.style.width = newW + 'px';
+      r.box.style.height = newH + 'px';
+      return;
+    }
+    if (state.dragState) {
+      const d = state.dragState;
+      const dx = (event.clientX - d.startX) / d.scale;
+      const dy = (event.clientY - d.startY) / d.scale;
+      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) d.moved = true;
+      if (d.moved) {
+        event.preventDefault();
+        const newLeft = event.shiftKey ? snap(d.startLeft + dx) : d.startLeft + dx;
+        const newTop = event.shiftKey ? snap(d.startTop + dy) : d.startTop + dy;
+        d.box.style.left = clamp(newLeft, 0, CANVAS_W - 40) + 'px';
+        d.box.style.top = clamp(newTop, 0, CANVAS_H - 30) + 'px';
+      }
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    state.dragState = null;
+    state.resizeState = null;
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      if (state.selectedBox) {
+        state.selectedBox = null;
+        updateSelectedUI();
+      } else if (state.editMode) {
+        toggleEdit();
+      }
+      return;
+    }
+    if (event.key.toLowerCase() === 'e' && !isTyping()) {
+      toggleEdit();
+      return;
+    }
+    if (!state.editMode) {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextSlide();
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') prevSlide();
+    }
+    if (state.editMode && state.selectedBox) {
+      if (event.key === 'Delete' && !isTyping()) deleteBox();
+      if (event.altKey && event.key === 'ArrowUp') { event.preventDefault(); adjustFontSize(2); }
+      if (event.altKey && event.key === 'ArrowDown') { event.preventDefault(); adjustFontSize(-2); }
+    }
+  });
+
+  window.addEventListener('resize', scaleCanvas);
+
+  function isTyping() {
+    const a = document.activeElement;
+    return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
+  }
+
+  function downloadText(filename, text, type) {
+    const blob = new Blob([text], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function toolbarHtml() {
+    return `<div class="phtml-toolbar">
+<div class="phtml-tb-section">
+  <span class="phtml-tb-label">Navigate</span>
+  <button onclick="prevSlide()" title="Prev [←]">← <kbd>←</kbd></button>
+  <button onclick="nextSlide()" title="Next [→]">→ <kbd>→</kbd></button>
+  <button onclick="addSlide()" title="Add slide">+ Slide</button>
+  <button onclick="deleteSlide()" title="Delete slide">− Slide</button>
+</div>
+<div class="phtml-tb-sep"></div>
+<div class="phtml-tb-section">
+  <span class="phtml-tb-label">Boxes</span>
+  <button onclick="addBox()" title="Add box [dblclick canvas]">+ Box</button>
+  <button onclick="duplicateBox()" title="Duplicate selected">Dup</button>
+  <button onclick="deleteBox()" title="Delete [Del]">Del <kbd>⌫</kbd></button>
+  <button onclick="bringForward()" title="Bring forward">↑Z</button>
+  <button onclick="sendBackward()" title="Send backward">↓Z</button>
+</div>
+<div class="phtml-tb-sep"></div>
+<div class="phtml-tb-section">
+  <span class="phtml-tb-label">Typography</span>
+  <button onclick="adjustFontSize(-2)" title="Smaller [Alt+↓]">A−</button>
+  <input id="phtml-fontSize" type="number" min="8" max="180" title="Font size" onchange="setFontSize(this.value)" />
+  <button onclick="adjustFontSize(2)" title="Larger [Alt+↑]">A+</button>
+  <button onclick="toggleBold()" title="Bold">B</button>
+  <button onclick="setAlign('left')" title="Left">⟵</button>
+  <button onclick="setAlign('center')" title="Center">≡</button>
+  <button onclick="setAlign('right')" title="Right">⟶</button>
+</div>
+<div class="phtml-tb-sep"></div>
+<div class="phtml-tb-section">
+  <span class="phtml-tb-label">Style</span>
+  <label class="phtml-tb-color-label" title="Text color">T <input id="phtml-colorPicker" type="color" value="#f8fafc" onchange="setColor(this.value)" /></label>
+  <label class="phtml-tb-color-label" title="Box fill">■ <input id="phtml-boxBg" type="color" value="#000000" onchange="setBoxBackground(this.value)" /></label>
+  <label class="phtml-tb-color-label" title="Slide background">BG <input id="phtml-slideBg" type="color" value="#0f172a" onchange="setBackground(this.value)" /></label>
+</div>
+<div class="phtml-tb-sep"></div>
+<div class="phtml-tb-section">
+  <span class="phtml-tb-label">File</span>
+  <button onclick="saveJSON()" title="Save JSON">Save</button>
+  <button onclick="document.getElementById('phtml-fileInput').click()" title="Load JSON">Load</button>
+  <button onclick="exportSingleFile()" title="Export HTML">Export</button>
+  <input id="phtml-fileInput" type="file" accept="application/json" style="display:none" onchange="loadJSONFile(event)" />
+</div>
+<div class="phtml-tb-sep"></div>
+<button onclick="toggleEdit()" title="Exit edit mode [Esc / E]" class="phtml-tb-exit">✕ <kbd>E</kbd></button>
+</div>`;
+  }
+
+  function rgbToHex(rgb) {
+    const nums = rgb.match(/\d+/g);
+    if (!nums || nums.length < 3) return '#000000';
+    return '#' + nums.slice(0, 3).map((n) => Number(n).toString(16).padStart(2, '0')).join('');
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  function escapeJsonForHtml(value) {
+    return JSON.stringify(value)
+      .replace(/&/g, '\\u0026')
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+  }
+
+  function escapeScriptForHtml(source) {
+    return String(source)
+      .replace(/<\/script/gi, '<\\/script')
+      .replace(/<\!--/g, '<\\!--');
+  }
+
+  function slugify(value) {
+    return String(value || 'phtml-deck').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'phtml-deck';
+  }
+
+  async function init(options = {}) {
+    if (options.toolbar !== false && !$('.phtml-toolbar')) {
+      document.body.insertAdjacentHTML('beforeend', toolbarHtml());
+    }
+    if (options.deck) {
+      renderDeck(options.deck);
+    } else if (options.deckUrl) {
+      await loadDeck(options.deckUrl);
+    } else {
+      const embedded = $('#phtml-deck-data');
+      if (embedded) renderDeck(JSON.parse(embedded.textContent));
+      else renderDeck({ title: 'PHTML Deck', slides: [{ boxes: [] }] });
+    }
+    if (options.agentBridge) {
+      connectAgentBridge(options.agentBridge === true ? undefined : options.agentBridge);
+    }
+    if (options.scrollMode) {
+      setupScrollMode();
+    } else {
+      scaleCanvas();
+    }
+  }
+
+  window.PHTML = {
+    init,
+    renderDeck,
+    loadDeck,
+    collectDeck,
+    toggleEdit,
+    showSlide,
+    nextSlide,
+    prevSlide,
+    addSlide,
+    deleteSlide,
+    addBox,
+    duplicateBox,
+    deleteBox,
+    bringForward,
+    sendBackward,
+    setFontSize,
+    adjustFontSize,
+    toggleBold,
+    setAlign,
+    setColor,
+    setBoxBackground,
+    setBackground,
+    setStyle,
+    setTheme,
+    saveJSON,
+    loadJSONFile,
+    exportSingleFile,
+    connectAgentBridge,
+    handleAgentCommand,
+    emitEvent,
+    scaleCanvas,
+  };
+
+  Object.assign(window, window.PHTML);
+})();
+</script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: true });</script>
+</body>
+</html>

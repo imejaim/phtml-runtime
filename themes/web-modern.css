@@ -1,0 +1,28 @@
+/* PTML — Web Modern */
+:root {
+  --phtml-bg: #07111f;
+  --phtml-panel: rgba(7,17,31,.82);
+  --phtml-text: #f8fbff;
+  --phtml-muted: #9fb0c8;
+  --phtml-accent: #5eead4;
+  --phtml-accent-2: #a78bfa;
+  --phtml-border: rgba(255,255,255,.13);
+  --phtml-radius: 18px;
+  --phtml-radius-lg: 28px;
+}
+body { background: var(--phtml-bg); color: var(--phtml-text); }
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 20% 10%, rgba(94,234,212,.20), transparent 28%), radial-gradient(circle at 83% 34%, rgba(167,139,250,.18), transparent 30%), linear-gradient(180deg, #07111f 0%, #0b1324 100%); }
+.phtml-slide { background: transparent; }
+.phtml-canvas { background: transparent; border-radius: 0; overflow: visible; }
+.phtml-deck.flow .phtml-slide { padding: 8vh 6vw; }
+.phtml-box { color: var(--phtml-text); }
+.phtml-box.hero-title { font-size: 74px; line-height: .95; letter-spacing: -.055em; font-weight: 900; }
+.phtml-box.hero-subtitle { font-size: 25px; line-height: 1.38; color: var(--phtml-muted); }
+.phtml-box.section-heading { font-size: 50px; font-weight: 850; letter-spacing: -.035em; }
+.phtml-box.pill { border: 1px solid rgba(94,234,212,.35); color: var(--phtml-accent); border-radius: 999px; padding: 12px 20px; font-size: 13px; letter-spacing: .16em; font-weight: 800; }
+.phtml-box.cta { background: linear-gradient(135deg, var(--phtml-accent), var(--phtml-accent-2)); color: #06111d; border-radius: 999px; padding: 17px 26px; font-size: 18px; font-weight: 850; text-align: center; box-shadow: 0 20px 70px rgba(94,234,212,.22); }
+.phtml-box.feature-card, .phtml-box.card { background: rgba(255,255,255,.075); border: 1px solid var(--phtml-border); border-radius: 28px; padding: 28px 30px; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 28px 80px rgba(0,0,0,.28); backdrop-filter: blur(14px); font-size: 20px; line-height: 1.5; color: var(--phtml-muted); }
+.phtml-box.feature-card strong, .phtml-box.card strong { color: #fff; font-size: 24px; }
+.phtml-box.accent { background: rgba(94,234,212,.1); border: 1px solid rgba(94,234,212,.25); border-radius: 999px; color: #d9fffa; font-size: 22px; text-align: center; padding: 22px 30px; }
+.phtml-status, .phtml-hint, .phtml-thumbnails { background: rgba(7,17,31,.72); color: var(--phtml-muted); border-color: var(--phtml-border); }
+.phtml-thumb.active { border-color: var(--phtml-accent); color: var(--phtml-accent); background: rgba(94,234,212,.12); }

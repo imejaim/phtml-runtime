@@ -1,14 +1,14 @@
 {
-  "name": "phtml-runtime",
+  "name": "@imejaim/ptml",
   "version": "1.0.0",
-  "description": "Installable editable HTML presentation runtime for humans and AI agents",
-  "keywords": ["presentation", "slides", "editable", "html", "agent", "ai", "runtime", "phtml"],
+  "description": "PTML: editable HTML presentation, report, document, and web runtime for humans and AI agents",
+  "keywords": ["ptml", "phtml", "presentation", "report", "document", "editable", "html", "agent", "ai", "runtime"],
   "author": "imejaim",
   "license": "MIT",
   "main": "runtime/phtml.js",
   "bin": {
-    "phtml": "./cli/index.js",
-    "ptml": "./cli/index.js"
+    "ptml": "./cli/index.js",
+    "phtml": "./cli/index.js"
   },
   "files": [
     "runtime/",

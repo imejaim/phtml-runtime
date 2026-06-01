@@ -1,0 +1,33 @@
+/* PTML — Document Simple */
+:root {
+  --phtml-bg: #fbfaf7;
+  --phtml-panel: rgba(255,255,255,0.9);
+  --phtml-text: #181713;
+  --phtml-muted: #706d64;
+  --phtml-accent: #8b5cf6;
+  --phtml-border: rgba(24,23,19,.12);
+  --phtml-radius: 14px;
+  --phtml-radius-lg: 22px;
+}
+body { background: var(--phtml-bg); color: var(--phtml-text); }
+.phtml-slide { background: transparent; }
+.phtml-canvas { background: transparent; border-radius: 0; overflow: visible; }
+.phtml-deck.flow .phtml-slide { padding: 6vh 7vw; }
+.phtml-box { color: var(--phtml-text); }
+.phtml-box.doc-title { font-size: 54px; line-height: 1.05; letter-spacing: -.035em; font-weight: 820; }
+.phtml-box.doc-meta { color: var(--phtml-muted); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; font-weight: 720; }
+.phtml-box.doc-heading { font-size: 40px; font-weight: 820; letter-spacing: -.025em; border-bottom: 1px solid var(--phtml-border); }
+.phtml-box.doc-body { font-size: 21px; line-height: 1.75; color: #34312a; }
+.phtml-box.doc-body h2 { margin: 0 0 12px; font-size: 26px; line-height: 1.2; letter-spacing: -.02em; color: var(--phtml-text); }
+.phtml-box.doc-body p { margin: 0 0 18px; }
+.phtml-box.doc-body ul { margin: 0; padding-left: 1.15em; }
+.phtml-box.doc-body li { margin: 0 0 12px; }
+.phtml-box.callout, .phtml-box.quote {
+  background: #fff; border: 1px solid var(--phtml-border); border-radius: 22px; padding: 25px 28px; box-shadow: 0 18px 50px rgba(24,23,19,.07); font-size: 19px; line-height: 1.55; color: #464238;
+}
+.phtml-box.callout { border-left: 6px solid var(--phtml-accent); }
+.phtml-box.quote { font-family: Georgia, 'Times New Roman', serif; font-size: 27px; line-height: 1.35; color: #2d2922; }
+.phtml-box.quote::before { content: '“'; display: block; color: var(--phtml-accent); font-size: 58px; line-height: .6; }
+.phtml-status, .phtml-hint, .phtml-thumbnails { background: rgba(255,255,255,.82); color: var(--phtml-muted); border-color: var(--phtml-border); }
+.phtml-thumb.active { border-color: var(--phtml-accent); color: var(--phtml-accent); background: rgba(139,92,246,.12); }
+@media print { body { background: white; } .phtml-box.doc-body { color: #111; } }

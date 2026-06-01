@@ -1,0 +1,204 @@
+/* PHTML — Editorial Dark Theme */
+
+:root {
+  --phtml-bg:         #0a0a0a;
+  --phtml-bg-surface: #111111;
+  --phtml-bg-card:    #181818;
+  --phtml-text:       #f0f0ee;
+  --phtml-text-muted: #888880;
+  --phtml-accent:     #ff4f2a;
+  --phtml-accent-dim: rgba(255, 79, 42, 0.12);
+  --phtml-border:     rgba(255, 255, 255, 0.08);
+  --phtml-border-strong: rgba(255, 255, 255, 0.16);
+}
+
+body {
+  background: var(--phtml-bg);
+  color: var(--phtml-text);
+}
+
+.phtml-slide {
+  background: var(--phtml-bg);
+}
+
+/* ── Box types ────────────────────────────────────────────────── */
+
+.phtml-box {
+  color: var(--phtml-text);
+}
+
+.phtml-box.title {
+  font-size: clamp(48px, 7.5vw, 112px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--phtml-text);
+  white-space: pre-wrap;
+}
+
+.phtml-box.subtitle {
+  font-size: clamp(18px, 2.5vw, 36px);
+  font-weight: 300;
+  line-height: 1.4;
+  color: var(--phtml-text-muted);
+  letter-spacing: -0.01em;
+}
+
+.phtml-box.body {
+  font-size: clamp(14px, 1.6vw, 20px);
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--phtml-text-muted);
+}
+
+.phtml-box.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--phtml-accent);
+}
+
+.phtml-box.accent {
+  background: var(--phtml-accent);
+  color: #fff;
+  font-size: clamp(14px, 1.8vw, 22px);
+  font-weight: 600;
+  padding: 16px 24px;
+  border-radius: var(--phtml-radius);
+}
+
+.phtml-box.card {
+  background: var(--phtml-bg-card);
+  border: 1px solid var(--phtml-border);
+  border-radius: var(--phtml-radius-lg);
+  padding: 28px 32px;
+  font-size: clamp(13px, 1.4vw, 18px);
+  line-height: 1.65;
+  color: var(--phtml-text-muted);
+}
+
+.phtml-box.card strong, .phtml-box.card b {
+  color: var(--phtml-text);
+  font-weight: 600;
+}
+
+.phtml-box.code {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-size: clamp(12px, 1.3vw, 16px);
+  line-height: 1.8;
+  background: #0d0d0d;
+  border: 1px solid var(--phtml-border);
+  border-left: 3px solid var(--phtml-accent);
+  border-radius: var(--phtml-radius);
+  padding: 20px 24px;
+  color: #7dff7a;
+  white-space: pre;
+}
+
+.phtml-box.pill {
+  border: 1px solid var(--phtml-border-strong);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--phtml-text-muted);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.phtml-box.pill.accent-pill {
+  border-color: var(--phtml-accent);
+  color: var(--phtml-accent);
+}
+
+.phtml-box.number {
+  font-size: clamp(64px, 10vw, 160px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--phtml-accent);
+}
+
+.phtml-box.divider {
+  background: var(--phtml-border);
+  border-radius: 2px;
+}
+
+/* ── Toolbar theming ──────────────────────────────────────────── */
+
+.phtml-toolbar {
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid var(--phtml-border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.04);
+  color: var(--phtml-text);
+}
+
+.phtml-toolbar-label {
+  color: var(--phtml-text-muted);
+}
+
+.phtml-toolbar button,
+.phtml-toolbar label {
+  background: transparent;
+  color: var(--phtml-text);
+}
+
+.phtml-toolbar button:hover,
+.phtml-toolbar label:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.phtml-toolbar input[type="number"] {
+  background: rgba(255,255,255,0.06);
+  color: var(--phtml-text);
+}
+
+.phtml-toolbar input[type="number"]:focus {
+  outline: 1px solid var(--phtml-accent);
+}
+
+/* ── Status + Hint + Nav ──────────────────────────────────────── */
+
+.phtml-status, .phtml-hint {
+  color: var(--phtml-text-muted);
+}
+
+.phtml-nav button {
+  background: rgba(255,255,255,0.07);
+  color: var(--phtml-text);
+}
+
+.phtml-nav button:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+.phtml-dot {
+  background: var(--phtml-text);
+}
+
+.phtml-dot.active {
+  background: var(--phtml-accent);
+  opacity: 1;
+}
+
+/* ── Slide accent line (top border) ───────────────────────────── */
+
+.phtml-slide:first-child::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--phtml-accent);
+  z-index: 10;
+}
+
+/* ── Selection highlight in edit mode ─────────────────────────── */
+
+.phtml-edit-mode .phtml-box {
+  outline-color: rgba(255,255,255,0.12);
+}
