@@ -39,7 +39,7 @@ const DESIGN_PRESETS = {
   },
   web: {
     default: 'web-modern',
-    aliases: { modern: 'web-modern', landing: 'web-modern', 'landing-modern': 'web-modern' },
+    aliases: { modern: 'web-modern', landing: 'web-modern', 'landing-modern': 'web-modern', immersive: 'web-immersive', premium: 'web-immersive', cinematic: 'web-immersive', horizontal: 'web-horizontal-cinematic', 'horizontal-cinematic': 'web-horizontal-cinematic' },
   },
 };
 
@@ -252,25 +252,69 @@ function createWebDeck(title, design) {
   };
 }
 
+function createImmersiveWebDeck(title, design) {
+  const horizontal = design === 'web-horizontal-cinematic';
+  return {
+    title,
+    type: 'web',
+    mode: horizontal ? 'horizontal' : 'scroll',
+    direction: horizontal ? 'horizontal' : 'vertical',
+    theme: design,
+    slides: [
+      { boxes: [
+        box('im-nav-1', 'micro-nav', 'PTML / LLM TO AGENT / 01', 64, 38, 340, 38),
+        box('im-title-1', 'immersive-title', title, 72, 124, 860, 172),
+        box('im-sub-1', 'immersive-subtitle', 'A cinematic, scroll-native template for explaining how language models become operating agents.', 78, 326, 650, 92),
+        box('im-orb-1', 'orbital-system mouse-react', '<span></span><i></i><b></b>', 760, 72, 420, 420),
+        box('im-cta-1', 'magnetic-cta mouse-react', 'Scroll to enter the operating loop', 80, 516, 390, 64),
+        box('im-note-1', 'side-note', 'Vertical scroll is the default. Horizontal mode is available when the story should feel like a cinematic track.', 914, 522, 260, 102),
+      ] },
+      { boxes: [
+        box('im-kicker-2', 'micro-nav', '02 / FROM RESPONSE TO ACTION', 64, 44, 380, 38),
+        box('im-title-2', 'immersive-heading', 'The page moves like the agent thinks.', 72, 110, 690, 132),
+        box('im-card-2a', 'glass-panel depth-card mouse-react', '<strong>Intent</strong><br/>The user asks for an outcome, not just an answer.', 90, 324, 330, 160),
+        box('im-card-2b', 'glass-panel depth-card mouse-react', '<strong>Tools</strong><br/>The agent reads, edits, executes, browses, and verifies.', 476, 260, 330, 160),
+        box('im-card-2c', 'glass-panel depth-card mouse-react', '<strong>Evidence</strong><br/>The final report shows what was actually checked.', 862, 324, 330, 160),
+        box('im-thread-2', 'motion-thread', '', 230, 536, 820, 20),
+      ] },
+      { boxes: [
+        box('im-kicker-3', 'micro-nav', '03 / AGENT SURFACE', 64, 44, 360, 38),
+        box('im-title-3', 'immersive-heading', 'Readable for humans. Structured for agents.', 72, 104, 760, 124),
+        box('im-console-3', 'agent-console mouse-react', '<code>goal.detect()</code><br/><code>context.load()</code><br/><code>tools.execute()</code><br/><code>result.verify()</code><br/><code>artifact.export()</code>', 86, 306, 430, 270),
+        box('im-body-3', 'large-copy', 'PTML keeps the final artifact editable while preserving a stable JSON/runtime convention. That means a designer can polish it, a manager can read it, and an agent can safely modify it later.', 620, 312, 520, 210),
+      ] },
+      { boxes: [
+        box('im-kicker-4', 'micro-nav', '04 / OUTPUT', 64, 44, 260, 38),
+        box('im-title-4', 'immersive-heading', 'One file. Multiple formats. Motion included.', 72, 114, 780, 120),
+        box('im-card-4a', 'format-card mouse-react', '<b>01</b><strong>Report</strong><span>Default vertical scroll for analysis and publishing.</span>', 86, 332, 310, 190),
+        box('im-card-4b', 'format-card mouse-react', '<b>02</b><strong>Web</strong><span>Premium landing-page motion and mouse-reactive surfaces.</span>', 486, 286, 310, 190),
+        box('im-card-4c', 'format-card mouse-react', '<b>03</b><strong>Track</strong><span>Optional horizontal scroll for PPT-like progression.</span>', 886, 332, 310, 190),
+      ] },
+    ],
+  };
+}
+
 function createStarterDeck(name, type = 'presentation', design) {
   const title = name || 'LLM to Agent';
   const resolvedType = normalizeType(type);
   const resolvedDesign = resolveDesign(resolvedType, design || undefined);
   if (resolvedType === 'report') return createReportDeck(title, resolvedDesign);
   if (resolvedType === 'document') return createDocumentDeck(title, resolvedDesign);
+  if (resolvedType === 'web' && (resolvedDesign === 'web-immersive' || resolvedDesign === 'web-horizontal-cinematic')) return createImmersiveWebDeck(title, resolvedDesign);
   if (resolvedType === 'web') return createWebDeck(title, resolvedDesign);
   return createPresentationDeck(title, resolvedDesign);
 }
 
 function buildStandaloneHtml(deck, options = {}) {
   const theme = options.theme || deck.theme || 'presentation-dark-tech';
-  const scrollMode = options.scrollMode ?? deck.mode === 'scroll' ?? false;
+  const scrollMode = options.scrollMode ?? (deck.mode === 'scroll' || deck.mode === 'horizontal');
+  const scrollAxis = options.scrollAxis || deck.direction || (deck.mode === 'horizontal' ? 'horizontal' : 'vertical');
   const coreCss = fs.readFileSync(path.join(PKG_DIR, 'runtime/phtml.css'), 'utf8');
   const themeCss = fs.readFileSync(themePath(theme), 'utf8');
   const js = fs.readFileSync(path.join(PKG_DIR, 'runtime/phtml.js'), 'utf8');
   const bridgeLine = options.agentBridge ? `, agentBridge: ${JSON.stringify(options.agentBridge)}` : '';
   const deckClass = scrollMode ? 'phtml-deck flow' : 'phtml-deck';
-  const hint = scrollMode ? 'E: edit · scroll: read · Export HTML: share as one file' : 'E: edit · arrows: navigate · Export HTML: share as one file';
+  const hint = scrollMode ? (scrollAxis === 'horizontal' ? 'E: edit · wheel/trackpad: horizontal story · Export HTML' : 'E: edit · scroll: read · Export HTML') : 'E: edit · arrows: navigate · Export HTML: share as one file';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,7 +329,7 @@ function buildStandaloneHtml(deck, options = {}) {
 <main class="${deckClass}"></main>
 <script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}</script>
 <script>${escapeScriptForHtml(js)}</script>
-<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: ${scrollMode}${bridgeLine} });</script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: ${scrollMode}, scrollAxis: '${scrollAxis}'${bridgeLine} });</script>
 </body>
 </html>`;
 }
@@ -295,7 +339,7 @@ function serve(args) {
   const doOpen = args.includes('--open') || args.includes('-o');
   const server = http.createServer((req, res) => {
     let urlPath = req.url.split('?')[0];
-    if (urlPath === '/') urlPath = '/examples/llm-to-agent/presentation-dark-tech.html';
+    if (urlPath === '/') urlPath = '/examples/llm-to-agent/web-immersive.html';
     const filePath = path.join(PKG_DIR, urlPath);
     if (!filePath.startsWith(PKG_DIR)) { res.writeHead(403); res.end('Forbidden'); return; }
     fs.readFile(filePath, (err, data) => {
@@ -314,7 +358,7 @@ function serve(args) {
     const url = `http://localhost:${port}`;
     console.log('\n  PTML Runtime\n');
     console.log(`  Local:   ${url}`);
-    console.log(`  Example: ${url}/examples/llm-to-agent/presentation-dark-tech.html`);
+    console.log(`  Example: ${url}/examples/llm-to-agent/web-immersive.html`);
     console.log('\n  Press Ctrl+C to stop\n');
     if (doOpen) openBrowser(url);
   });
@@ -329,7 +373,8 @@ function init(args) {
   fs.mkdirSync(dir, { recursive: true });
   const starterDeck = createStarterDeck(name, type, design);
   fs.writeFileSync(path.join(dir, 'deck.json'), JSON.stringify(starterDeck, null, 2));
-  const scrollMode = starterDeck.mode === 'scroll';
+  const scrollMode = starterDeck.mode === 'scroll' || starterDeck.mode === 'horizontal';
+  const scrollAxis = starterDeck.direction || (starterDeck.mode === 'horizontal' ? 'horizontal' : 'vertical');
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -340,12 +385,12 @@ function init(args) {
   <link rel="stylesheet" href="node_modules/${PACKAGE_IMPORT_NAME}/themes/${design}.css" />
 </head>
 <body>
-  <div class="phtml-hint">E: edit · ${scrollMode ? 'scroll: read' : 'arrows: navigate'}</div>
+  <div class="phtml-hint">E: edit · ${scrollMode ? (scrollAxis === 'horizontal' ? 'wheel/trackpad: horizontal' : 'scroll: read') : 'arrows: navigate'}</div>
   <div class="phtml-status"></div>
   <main class="phtml-deck${scrollMode ? ' flow' : ''}"></main>
   <script src="node_modules/${PACKAGE_IMPORT_NAME}/runtime/phtml.js"></script>
   <script>
-    PHTML.init({ deckUrl: 'deck.json', scrollMode: ${scrollMode}, agentBridge: 'ws://localhost:8787' });
+    PHTML.init({ deckUrl: 'deck.json', scrollMode: ${scrollMode}, scrollAxis: '${scrollAxis}', agentBridge: 'ws://localhost:8787' });
   </script>
 </body>
 </html>`;
@@ -372,7 +417,7 @@ function newStandalone(args) {
     process.exit(1);
   }
   const deck = createStarterDeck(title, type, design);
-  const html = buildStandaloneHtml(deck, { theme: design, scrollMode: deck.mode === 'scroll', agentBridge });
+  const html = buildStandaloneHtml(deck, { theme: design, scrollMode: deck.mode === 'scroll' || deck.mode === 'horizontal', scrollAxis: deck.direction, agentBridge });
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, html);
   console.log(`Created standalone editable PTML file: ${out}`);
@@ -385,7 +430,7 @@ function exportHtml(args) {
   if (!deckPath) { console.error('Usage: ptml export <deck.json>'); process.exit(1); }
   const resolvedDeckPath = path.resolve(deckPath);
   const deck = JSON.parse(fs.readFileSync(resolvedDeckPath, 'utf8'));
-  const html = buildStandaloneHtml(deck, { theme: deck.theme || 'presentation-dark-tech', scrollMode: deck.mode === 'scroll' });
+  const html = buildStandaloneHtml(deck, { theme: deck.theme || 'presentation-dark-tech', scrollMode: deck.mode === 'scroll' || deck.mode === 'horizontal', scrollAxis: deck.direction });
   const out = resolvedDeckPath.replace(/\.json$/, '.html');
   fs.writeFileSync(out, html);
   console.log(`Exported: ${out}`);
@@ -408,5 +453,5 @@ switch (cmd) {
     console.log(availableThemes().join('\n'));
     break;
   default:
-    console.log(`ptml <command>\n\nCommands:\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                         Create one standalone editable HTML file\n  init [name] [--type type] [--design name]\n                         Create a PTML project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  designs                List installed designs/themes\n  version, --version     Print installed version\n\nExamples:\n  ptml new llm-report.html --type report --design analyst-light\n  ptml new llm-deck.html --type presentation --design dark-tech\n  ptml new llm-doc.html --type document --design simple-doc\n`);
+    console.log(`ptml <command>\n\nCommands:\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                         Create one standalone editable HTML file\n  init [name] [--type type] [--design name]\n                         Create a PTML project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  designs                List installed designs/themes\n  version, --version     Print installed version\n\nExamples:\n  ptml new llm-report.html --type report --design analyst-light\n  ptml new llm-deck.html --type presentation --design dark-tech\n  ptml new llm-doc.html --type document --design simple-doc\n  ptml new llm-site.html --type web --design immersive\n  ptml new llm-track.html --type web --design horizontal\n`);
 }

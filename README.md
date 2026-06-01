@@ -34,6 +34,8 @@ ptml new llm-deck.html --type presentation --design dark-tech --title "LLM to Ag
 ptml new llm-report.html --type report --design analyst-light --title "LLM to Agent Analysis Report"
 ptml new llm-memo.html --type document --design simple-doc --title "LLM to Agent Operating Memo"
 ptml new llm-web.html --type web --design modern --title "LLM to Agent"
+ptml new llm-immersive.html --type web --design immersive --title "LLM to Agent"
+ptml new llm-horizontal.html --type web --design horizontal --title "LLM to Agent"
 ```
 
 Each output is a single HTML file:
@@ -50,7 +52,9 @@ Each output is a single HTML file:
 - `presentation`: slide/deck mode, large visual typography, arrow navigation.
 - `report`: scroll mode, executive summary, KPI cards, insight/recommendation/risk blocks.
 - `document`: scroll mode, long-form memo/spec style, readable text and callouts.
-- `web`: scroll mode, landing-page/product-page style sections.
+- `web`: scroll mode, landing-page/product-page style sections. The default reading direction is vertical.
+- `web` with `--design immersive`: premium vertical scroll with reveal motion and mouse-reactive surfaces.
+- `web` with `--design horizontal`: optional sideways, PPT-like cinematic track using the mouse wheel/trackpad.
 
 ## Designs/themes
 
@@ -68,6 +72,8 @@ Current design files:
 - `report-analyst-light`
 - `document-simple`
 - `web-modern`
+- `web-immersive`
+- `web-horizontal-cinematic`
 
 Backward-compatible theme names are also kept:
 
@@ -83,6 +89,8 @@ Design aliases:
 --design analyst-light  # report-analyst-light
 --design simple-doc     # document-simple
 --design modern         # web-modern
+--design immersive      # web-immersive
+--design horizontal     # web-horizontal-cinematic
 ```
 
 ## Included examples
@@ -95,6 +103,8 @@ examples/llm-to-agent/presentation-editorial-light.html
 examples/llm-to-agent/report-analyst-light.html
 examples/llm-to-agent/document-simple.html
 examples/llm-to-agent/web-modern.html
+examples/llm-to-agent/web-immersive.html
+examples/llm-to-agent/web-horizontal-cinematic.html
 ```
 
 Serve them locally:

@@ -1,4 +1,388 @@
-// PHTML Runtime v1.0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LLM to Agent</title>
+<style>:root {
+  --phtml-bg: #0f172a;
+  --phtml-panel: rgba(15, 23, 42, 0.88);
+  --phtml-text: #f8fafc;
+  --phtml-muted: #94a3b8;
+  --phtml-accent: #38bdf8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--phtml-text);
+  overflow: hidden;
+  user-select: none;
+}
+
+.phtml-deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.phtml-slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.phtml-slide.active { display: block; }
+
+.phtml-canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: top left;
+}
+
+.phtml-canvas {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.phtml-box {
+  position: absolute;
+  min-width: 80px;
+  min-height: 36px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  user-select: text;
+  white-space: pre-wrap;
+}
+
+body.phtml-edit-mode .phtml-box {
+  outline: 1.5px dashed rgba(56, 189, 248, 0.38);
+  cursor: move;
+}
+
+body.phtml-edit-mode .phtml-box.selected {
+  outline: 3px solid rgba(56, 189, 248, 0.95);
+  background-color: rgba(56, 189, 248, 0.08);
+}
+
+body.phtml-edit-mode .phtml-box.phtml-text-overflow::after {
+  content: '↕';
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: #f97316;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.phtml-resize-handle {
+  display: none;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  right: -7px;
+  bottom: -7px;
+  background: var(--phtml-accent);
+  border-radius: 50%;
+  border: 2px solid #020617;
+  cursor: nwse-resize;
+  z-index: 10;
+}
+
+body.phtml-edit-mode .phtml-box.selected .phtml-resize-handle { display: block; }
+
+.phtml-toolbar {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  display: none;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: var(--phtml-panel);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(16px);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 24px);
+}
+
+body.phtml-edit-mode .phtml-toolbar { display: flex; }
+
+.phtml-tb-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.phtml-tb-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--phtml-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.phtml-tb-section > *:not(.phtml-tb-label) {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.phtml-tb-sep {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.phtml-tb-color-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--phtml-muted);
+  cursor: pointer;
+}
+
+.phtml-toolbar button,
+.phtml-toolbar input[type="number"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.phtml-toolbar input[type="color"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  border-radius: 6px;
+  width: 26px;
+  height: 22px;
+  padding: 1px 2px;
+  cursor: pointer;
+}
+
+.phtml-toolbar input[type="number"] { width: 64px; }
+
+.phtml-toolbar button {
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.phtml-toolbar button kbd {
+  font-size: 10px;
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.phtml-toolbar button:hover { background: rgba(56, 189, 248, 0.22); }
+
+.phtml-tb-exit {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+  align-self: center;
+}
+
+.phtml-tb-exit:hover { background: rgba(239, 68, 68, 0.28) !important; }
+
+.phtml-thumbnails {
+  position: fixed;
+  z-index: 90;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+body.phtml-edit-mode .phtml-thumbnails { display: none; }
+
+.phtml-thumb {
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms, border-color 120ms;
+}
+
+.phtml-thumb.active {
+  border-color: var(--phtml-accent);
+  color: var(--phtml-accent);
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.phtml-status,
+.phtml-hint {
+  position: fixed;
+  z-index: 90;
+  color: var(--phtml-muted);
+  font-size: 14px;
+  background: rgba(15, 23, 42, 0.64);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.phtml-status { top: 18px; right: 20px; }
+.phtml-hint { top: 20px; left: 24px; }
+
+.phtml-nav {
+  position: fixed;
+  bottom: 14px;
+  right: 28px;
+  display: flex;
+  gap: 8px;
+  z-index: 90;
+}
+
+.phtml-nav button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+[contenteditable="true"] { cursor: text; }
+
+@media (max-width: 760px) {
+  .phtml-toolbar { bottom: 46px; }
+  .phtml-hint { display: none; }
+}
+
+@media print {
+  body { overflow: visible; background: white; }
+  .phtml-toolbar, .phtml-nav, .phtml-hint, .phtml-status, .phtml-resize-handle, .phtml-thumbnails { display: none !important; }
+  .phtml-deck { height: auto; overflow: visible; }
+  .phtml-slide {
+    display: block !important;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    page-break-after: always;
+  }
+  .phtml-canvas-wrapper { transform: none !important; position: relative !important; width: 100% !important; height: 100vh !important; }
+  .phtml-canvas { width: 100% !important; height: 100% !important; }
+}
+
+/* PTML — Web Immersive: premium vertical scroll + mouse-reactive motion */
+:root {
+  --phtml-bg: #06070a;
+  --phtml-panel: rgba(8, 10, 16, .72);
+  --phtml-text: #f6f2e8;
+  --phtml-muted: #9d9587;
+  --phtml-accent: #d7b77a;
+  --phtml-accent-2: #7dd3fc;
+  --phtml-border: rgba(246, 242, 232, .14);
+  --mx: calc((var(--ptml-mouse-x, .5) - .5) * 1px);
+  --my: calc((var(--ptml-mouse-y, .5) - .5) * 1px);
+}
+body { background: var(--phtml-bg); color: var(--phtml-text); cursor: crosshair; }
+body::before {
+  content: ''; position: fixed; inset: -20vmax; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at calc(var(--ptml-mouse-x, .5) * 100%) calc(var(--ptml-mouse-y, .5) * 100%), rgba(215,183,122,.18), transparent 22vmax),
+    radial-gradient(circle at 78% 16%, rgba(125,211,252,.12), transparent 26vmax),
+    linear-gradient(120deg, #05070b 0%, #101015 52%, #211b14 100%);
+  transition: background 140ms linear;
+}
+body::after {
+  content: ''; position: fixed; left: var(--ptml-cursor-x, -100px); top: var(--ptml-cursor-y, -100px); z-index: 9999; pointer-events: none;
+  width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 1px solid rgba(215,183,122,.68); border-radius: 999px; mix-blend-mode: difference;
+  transition: width .18s ease, height .18s ease, margin .18s ease;
+}
+.phtml-slide { background: transparent; perspective: 1200px; }
+.phtml-canvas { background: transparent; border-radius: 0; overflow: visible; }
+.phtml-deck.flow .phtml-slide { padding: 7vh 5vw; align-items: center; }
+.phtml-box { color: var(--phtml-text); }
+.phtml-box.micro-nav { font-size: 12px; letter-spacing: .22em; font-weight: 780; color: var(--phtml-accent); text-transform: uppercase; }
+.phtml-box.immersive-title { font-size: 104px; line-height: .82; letter-spacing: -.075em; font-weight: 920; text-transform: uppercase; text-wrap: balance; text-shadow: 0 24px 80px rgba(0,0,0,.5); transform: translate3d(calc(var(--mx) * -18), calc(var(--my) * -10), 0); }
+.phtml-box.immersive-subtitle { font-size: 24px; line-height: 1.32; color: #d8d0c2; font-weight: 420; }
+.phtml-box.immersive-heading { font-size: 68px; line-height: .95; letter-spacing: -.055em; font-weight: 900; text-wrap: balance; }
+.phtml-box.large-copy { font-size: 25px; line-height: 1.48; color: #d7cfc0; }
+.phtml-box.side-note { color: var(--phtml-muted); font-size: 15px; line-height: 1.5; border-top: 1px solid var(--phtml-border); padding-top: 18px; }
+.phtml-box.orbital-system { border: 1px solid rgba(215,183,122,.18); border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(215,183,122,.14), transparent 34%), linear-gradient(135deg, rgba(255,255,255,.03), transparent); box-shadow: inset 0 0 80px rgba(215,183,122,.08), 0 40px 120px rgba(0,0,0,.45); transform: rotateX(calc(var(--my) * -16)) rotateY(calc(var(--mx) * 18)); }
+.phtml-box.orbital-system::before, .phtml-box.orbital-system::after { content: ''; position: absolute; inset: 12%; border: 1px solid rgba(215,183,122,.30); border-radius: 50%; transform: rotate(28deg); }
+.phtml-box.orbital-system::after { inset: 28%; border-color: rgba(125,211,252,.35); transform: rotate(-42deg); }
+.phtml-box.orbital-system span { position:absolute; width: 20px; height: 20px; border-radius: 50%; right: 18%; top: 23%; background: var(--phtml-accent); box-shadow: 0 0 40px var(--phtml-accent); }
+.phtml-box.orbital-system i { position:absolute; width: 12px; height: 12px; border-radius: 50%; left: 25%; bottom: 21%; background: var(--phtml-accent-2); box-shadow: 0 0 34px var(--phtml-accent-2); }
+.phtml-box.orbital-system b { position:absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px; border-radius: 50%; background: #f6f2e8; box-shadow: 0 0 90px rgba(246,242,232,.42); }
+.phtml-box.magnetic-cta { display:flex; align-items:center; justify-content:center; border:1px solid rgba(215,183,122,.42); border-radius:999px; background:rgba(215,183,122,.10); font-size:18px; font-weight:800; color:#f8edce; transform: translate3d(calc(var(--mx) * 10), calc(var(--my) * 8), 0); }
+.phtml-box.glass-panel, .phtml-box.agent-console, .phtml-box.format-card { background: linear-gradient(135deg, rgba(255,255,255,.105), rgba(255,255,255,.035)); border: 1px solid var(--phtml-border); border-radius: 30px; backdrop-filter: blur(18px); box-shadow: 0 34px 110px rgba(0,0,0,.32); padding: 28px 30px; color: #cfc7b8; font-size: 19px; line-height: 1.42; }
+.phtml-box.depth-card { transform: translateY(34px) rotateX(8deg); opacity: .35; transition: transform .9s cubic-bezier(.16,1,.3,1), opacity .9s; }
+.phtml-slide.visible .phtml-box.depth-card { transform: translateY(0) rotateX(0); opacity: 1; }
+.phtml-box.glass-panel strong { display:block; color:#fff7df; font-size:30px; margin-bottom:14px; }
+.phtml-box.motion-thread { height:2px !important; background: linear-gradient(90deg, transparent, var(--phtml-accent), var(--phtml-accent-2), transparent); box-shadow: 0 0 30px rgba(215,183,122,.5); }
+.phtml-box.agent-console { font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace; color: #a7f3d0; font-size: 22px; line-height: 1.75; }
+.phtml-box.agent-console code { color: #bfffe0; }
+.phtml-box.format-card b { display:block; color: var(--phtml-accent); font-size: 14px; letter-spacing: .18em; margin-bottom: 28px; }
+.phtml-box.format-card strong { display:block; color:#fff; font-size:34px; margin-bottom: 18px; }
+.phtml-box.format-card span { color:#cfc7b8; font-size:18px; line-height:1.4; }
+.phtml-status, .phtml-hint, .phtml-thumbnails { background: rgba(8,10,16,.58); color: var(--phtml-muted); border-color: var(--phtml-border); }
+.phtml-thumb.active { border-color: var(--phtml-accent); color: var(--phtml-accent); background: rgba(215,183,122,.16); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; transform: none !important; } }
+
+/* Horizontal cinematic overrides */
+body.phtml-horizontal-scroll::before {
+  background:
+    radial-gradient(circle at calc(var(--ptml-mouse-x, .5) * 100%) calc(var(--ptml-mouse-y, .5) * 100%), rgba(125,211,252,.16), transparent 22vmax),
+    linear-gradient(90deg, #05070b 0%, #151018 40%, #20150d 72%, #06070a 100%);
+}
+body.phtml-horizontal-scroll .phtml-deck.flow .phtml-slide { padding: 7vh 6vw; }
+body.phtml-horizontal-scroll .phtml-slide::before {
+  content: ''; position: absolute; inset: 10vh auto 10vh -1px; width: 1px; background: linear-gradient(transparent, rgba(215,183,122,.45), transparent);
+}
+body.phtml-horizontal-scroll .phtml-box.immersive-title { font-size: 96px; }
+body.phtml-horizontal-scroll .phtml-box.motion-thread { background: linear-gradient(90deg, var(--phtml-accent), transparent 22%, var(--phtml-accent-2), transparent); }
+body.phtml-horizontal-scroll .phtml-thumbnails { left: auto; right: 28px; transform: none; }
+</style>
+</head>
+<body class="ptml-web">
+<div class="phtml-hint">E: edit · wheel/trackpad: horizontal story · Export HTML</div>
+<div class="phtml-status"></div>
+<main class="phtml-deck flow"></main>
+<script id="phtml-deck-data" type="application/json">{"title":"LLM to Agent","type":"web","mode":"horizontal","direction":"horizontal","theme":"web-horizontal-cinematic","slides":[{"boxes":[{"id":"im-nav-1","className":"phtml-box micro-nav","html":"PTML / LLM TO AGENT / 01","x":64,"y":38,"w":340,"h":38},{"id":"im-title-1","className":"phtml-box immersive-title","html":"LLM to Agent","x":72,"y":124,"w":860,"h":172},{"id":"im-sub-1","className":"phtml-box immersive-subtitle","html":"A cinematic, scroll-native template for explaining how language models become operating agents.","x":78,"y":326,"w":650,"h":92},{"id":"im-orb-1","className":"phtml-box orbital-system mouse-react","html":"\u003cspan\u003e\u003c/span\u003e\u003ci\u003e\u003c/i\u003e\u003cb\u003e\u003c/b\u003e","x":760,"y":72,"w":420,"h":420},{"id":"im-cta-1","className":"phtml-box magnetic-cta mouse-react","html":"Scroll to enter the operating loop","x":80,"y":516,"w":390,"h":64},{"id":"im-note-1","className":"phtml-box side-note","html":"Vertical scroll is the default. Horizontal mode is available when the story should feel like a cinematic track.","x":914,"y":522,"w":260,"h":102}]},{"boxes":[{"id":"im-kicker-2","className":"phtml-box micro-nav","html":"02 / FROM RESPONSE TO ACTION","x":64,"y":44,"w":380,"h":38},{"id":"im-title-2","className":"phtml-box immersive-heading","html":"The page moves like the agent thinks.","x":72,"y":110,"w":690,"h":132},{"id":"im-card-2a","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eIntent\u003c/strong\u003e\u003cbr/\u003eThe user asks for an outcome, not just an answer.","x":90,"y":324,"w":330,"h":160},{"id":"im-card-2b","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eTools\u003c/strong\u003e\u003cbr/\u003eThe agent reads, edits, executes, browses, and verifies.","x":476,"y":260,"w":330,"h":160},{"id":"im-card-2c","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eEvidence\u003c/strong\u003e\u003cbr/\u003eThe final report shows what was actually checked.","x":862,"y":324,"w":330,"h":160},{"id":"im-thread-2","className":"phtml-box motion-thread","html":"","x":230,"y":536,"w":820,"h":20}]},{"boxes":[{"id":"im-kicker-3","className":"phtml-box micro-nav","html":"03 / AGENT SURFACE","x":64,"y":44,"w":360,"h":38},{"id":"im-title-3","className":"phtml-box immersive-heading","html":"Readable for humans. Structured for agents.","x":72,"y":104,"w":760,"h":124},{"id":"im-console-3","className":"phtml-box agent-console mouse-react","html":"\u003ccode\u003egoal.detect()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003econtext.load()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003etools.execute()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003eresult.verify()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003eartifact.export()\u003c/code\u003e","x":86,"y":306,"w":430,"h":270},{"id":"im-body-3","className":"phtml-box large-copy","html":"PTML keeps the final artifact editable while preserving a stable JSON/runtime convention. That means a designer can polish it, a manager can read it, and an agent can safely modify it later.","x":620,"y":312,"w":520,"h":210}]},{"boxes":[{"id":"im-kicker-4","className":"phtml-box micro-nav","html":"04 / OUTPUT","x":64,"y":44,"w":260,"h":38},{"id":"im-title-4","className":"phtml-box immersive-heading","html":"One file. Multiple formats. Motion included.","x":72,"y":114,"w":780,"h":120},{"id":"im-card-4a","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e01\u003c/b\u003e\u003cstrong\u003eReport\u003c/strong\u003e\u003cspan\u003eDefault vertical scroll for analysis and publishing.\u003c/span\u003e","x":86,"y":332,"w":310,"h":190},{"id":"im-card-4b","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e02\u003c/b\u003e\u003cstrong\u003eWeb\u003c/strong\u003e\u003cspan\u003ePremium landing-page motion and mouse-reactive surfaces.\u003c/span\u003e","x":486,"y":286,"w":310,"h":190},{"id":"im-card-4c","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e03\u003c/b\u003e\u003cstrong\u003eTrack\u003c/strong\u003e\u003cspan\u003eOptional horizontal scroll for PPT-like progression.\u003c/span\u003e","x":886,"y":332,"w":310,"h":190}]}]}</script>
+<script>// PHTML Runtime v1.0
 
 (function () {
   const CANVAS_W = 1280;
@@ -455,9 +839,9 @@
 <main class="phtml-deck"></main>
 ${toolbarHtml()}
 <div class="phtml-nav"><button onclick="prevSlide()">←</button><button onclick="nextSlide()">→</button></div>
-<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}</script>
-<script>${escapeScriptForHtml(jsText)}</script>
-<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });</script>
+<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}<\/script>
+<script>${escapeScriptForHtml(jsText)}<\/script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });<\/script>
 </body>
 </html>`;
     downloadText(`${slugify(deck.title)}.html`, html, 'text/html');
@@ -918,7 +1302,7 @@ ${toolbarHtml()}
   function escapeScriptForHtml(source) {
     return String(source)
       .replace(/<\/script/gi, '<\\/script')
-      .replace(/<!--/g, '<\\!--');
+      .replace(/<\!--/g, '<\\!--');
   }
 
   function slugify(value) {
@@ -985,3 +1369,7 @@ ${toolbarHtml()}
 
   Object.assign(window, window.PHTML);
 })();
+</script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: true, scrollAxis: 'horizontal' });</script>
+</body>
+</html>
