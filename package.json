@@ -1,6 +1,6 @@
 {
   "name": "@imejaim/ptml",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PTML: editable HTML presentation, report, document, and web runtime for humans and AI agents",
   "keywords": [
     "ptml",
