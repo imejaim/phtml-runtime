@@ -1,18 +1,15 @@
 # PTML Runtime
 
-PTML is an installable editable HTML runtime for presentations, scrollable reports, simple documents, and web-style pages.
+```bash
+npm install -g @imejaim/ptml
+ptml new my-site.html --type web --title "My Immersive Page"
+```
+
+PTML is an installable editable HTML runtime for presentations, scrollable reports, simple documents, and immersive web-style pages.
 
 It is **not a new programming language**. It is a shared CLI/runtime and file convention so humans and AI agents start from the same baseline: editable boxes, deck/document data, themes, export, and optional agent control.
 
 ## Install
-
-Before npm publishing, install from GitHub:
-
-```bash
-npm install -g git+ssh://git@github.com/imejaim/phtml-runtime.git
-```
-
-After npm publishing, the intended package name is scoped and short:
 
 ```bash
 npm install -g @imejaim/ptml
@@ -26,6 +23,21 @@ phtml --version
 ```
 
 `ptml` is the preferred product/CLI name. `phtml` remains an alias for compatibility.
+
+## Quick start: immersive editable HTML anywhere
+
+```bash
+ptml new my-site.html --type web --title "My Immersive Page"
+open my-site.html
+```
+
+The default `--type web` design is immersive. Open the generated standalone HTML file in a browser, press **E** to edit, then use **Export HTML** to save/share the edited version.
+
+GitHub install fallback:
+
+```bash
+npm install -g git+ssh://git@github.com/imejaim/phtml-runtime.git
+```
 
 ## Create standalone editable files
 
