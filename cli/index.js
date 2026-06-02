@@ -38,8 +38,22 @@ const DESIGN_PRESETS = {
     aliases: { simple: 'document-simple', 'simple-doc': 'document-simple' },
   },
   web: {
-    default: 'web-immersive',
-    aliases: { modern: 'web-modern', basic: 'web-modern', landing: 'web-immersive', 'landing-modern': 'web-modern', immersive: 'web-immersive', premium: 'web-immersive', cinematic: 'web-immersive', default: 'web-immersive', horizontal: 'web-horizontal-cinematic', 'horizontal-cinematic': 'web-horizontal-cinematic' },
+    default: 'web-warm-paper',
+    aliases: {
+      warm: 'web-warm-paper',
+      paper: 'web-warm-paper',
+      'warm-paper': 'web-warm-paper',
+      modern: 'web-warm-paper',
+      basic: 'web-warm-paper',
+      landing: 'web-warm-paper',
+      'landing-modern': 'web-warm-paper',
+      immersive: 'web-warm-paper',
+      premium: 'web-warm-paper',
+      cinematic: 'web-warm-paper',
+      default: 'web-warm-paper',
+      horizontal: 'web-warm-paper',
+      'horizontal-cinematic': 'web-warm-paper',
+    },
   },
 };
 
@@ -232,67 +246,49 @@ function createWebDeck(title, design) {
     title,
     type: 'web',
     mode: 'scroll',
+    direction: 'vertical',
     theme: design,
     slides: [
       { boxes: [
-        box('w-pill-1', 'pill', 'LLM TO AGENT', 78, 68, 220, 48),
-        box('w-title-1', 'hero-title', title, 76, 146, 760, 130),
-        box('w-sub-1', 'hero-subtitle', 'A modern web-style explainer page for teams adopting tool-using AI agents.', 80, 314, 670, 86),
-        box('w-cta-1', 'cta', 'Explore the operating model', 82, 464, 300, 58),
-        box('w-card-1', 'feature-card', '<strong>Agentic loop</strong><br/>Plan, act, observe, verify, report.', 780, 170, 330, 180),
+        box('wp-pill-1', 'pill', 'WARM PAPER / SCROLL ACTION', 78, 68, 360, 48),
+        box('wp-title-1', 'warm-title', title, 76, 146, 680, 188),
+        box('wp-sub-1', 'warm-subtitle', 'A scroll-native PTML starter that reads like a web landing page and stays disciplined like an internal report. Typography, line length, and spacing come first; motion is layered on top.', 80, 360, 650, 142),
+        box('wp-cta-1', 'cta mouse-react', 'Read the scroll report', 82, 556, 260, 58),
+        box('wp-card-1', 'report-card mouse-react', '<strong>Title stays contained.</strong> Big enough for a landing hero, restrained enough for a report. Body text keeps a readable width instead of filling every box.', 790, 132, 346, 230),
+        box('wp-flow-1', 'text-flow-demo', '<p>PHTML is a readable scroll document. Paragraphs breathe; cards support; the immersive layer reacts lightly.</p>', 786, 404, 360, 216),
       ] },
       { boxes: [
-        box('w-heading-2', 'section-heading', 'What changes?', 78, 76, 560, 76),
-        box('w-feature-1', 'feature-card', '<strong>Tools</strong><br/>The agent can read, edit, run, browse, and send.', 82, 214, 310, 170),
-        box('w-feature-2', 'feature-card', '<strong>Memory</strong><br/>Stable preferences and conventions reduce repeated steering.', 484, 214, 310, 170),
-        box('w-feature-3', 'feature-card', '<strong>Artifacts</strong><br/>PTML makes deliverables editable, inspectable, and shareable.', 886, 214, 310, 170),
-        box('w-band-2', 'accent', 'The output should look like a designed web page while preserving the same PTML edit/export controls.', 160, 496, 960, 78),
+        box('wp-kicker-2', 'micro-nav', '02 / LAYOUT BEFORE EFFECTS', 78, 66, 360, 38),
+        box('wp-title-2', 'section-heading', '글자 크기와 배치를 먼저 정하고, 장식은 나중에 붙입니다.', 78, 126, 640, 100),
+        box('wp-body-2', 'body', 'The default template uses a report-like rhythm: moderate headings, 16–19px body copy, readable measure, and section spacing instead of oversized PPT blocks.', 82, 262, 650, 128),
+        box('wp-rule-2', 'scroll-rule', 'Rule of thumb: hero title 42–58px, section heading 31–38px, body 17–19px, paragraph width 620–720px.', 82, 488, 620, 96),
+        box('wp-card-2a', 'feature-card depth-card mouse-react', '<strong>Readable width</strong>Long text never stretches across the whole canvas. It sits in a predictable column.', 780, 140, 320, 150),
+        box('wp-card-2b', 'feature-card depth-card mouse-react', '<strong>Soft separation</strong>Use whitespace, lines, and paper cards before heavy decoration.', 780, 330, 320, 150),
+        box('wp-card-2c', 'feature-card depth-card mouse-react', '<strong>No overflow</strong>Default box sizes are conservative so edited text has room to breathe.', 780, 520, 320, 150),
+      ] },
+      { boxes: [
+        box('wp-kicker-3', 'micro-nav', '03 / IMMERSIVE LAYER', 78, 66, 330, 38),
+        box('wp-title-3', 'section-heading', 'Immersive는 별도 양식이 아니라 문서 위에 얹는 반응 레이어입니다.', 78, 126, 700, 108),
+        box('wp-body-3', 'body', 'Scroll reveal, pointer-reactive light, floating cards, and pretext-like text flow are welcome by default. The document still stays vertical, calm, and editable.', 82, 270, 650, 120),
+        box('wp-flow-3', 'text-flow-demo mouse-react', '<p>Pretext-style motion can make words flow around an object. In PTML, that belongs as a subtle effect sample — not as a reason to distort the report layout.</p>', 82, 456, 560, 168),
+        box('wp-card-3a', 'glass-panel depth-card mouse-react', '<strong>Scroll action</strong>Sections reveal as the reader moves down the page.', 748, 170, 330, 144),
+        box('wp-card-3b', 'glass-panel depth-card mouse-react', '<strong>Pointer reaction</strong>Background light and cards move only a few pixels.', 748, 362, 330, 144),
+        box('wp-card-3c', 'glass-panel depth-card mouse-react', '<strong>Export-safe</strong>Everything remains one editable HTML file.', 748, 554, 330, 116),
+      ] },
+      { boxes: [
+        box('wp-kicker-4', 'micro-nav', '04 / OUTPUT', 78, 66, 260, 38),
+        box('wp-title-4', 'section-heading', 'One warm paper template for web reports, product narratives, and internal docs.', 78, 132, 710, 110),
+        box('wp-body-4', 'body', 'Older web templates are folded into this single default direction: scrollable, clean, report-like, and motion-ready.', 82, 286, 640, 110),
+        box('wp-card-4a', 'format-card depth-card mouse-react', '<strong>Simple by default</strong><span>Warm paper, calm typography, and readable sections.</span>', 760, 150, 320, 154),
+        box('wp-card-4b', 'format-card depth-card mouse-react', '<strong>Immersive when useful</strong><span>Reveal, parallax, cursor light, and text-flow effects stay optional layers.</span>', 760, 354, 320, 166),
+        box('wp-accent-4', 'accent', 'PTML starts as a scroll report, then becomes expressive where the story needs it.', 126, 544, 820, 74),
       ] },
     ],
   };
 }
 
 function createImmersiveWebDeck(title, design) {
-  const horizontal = design === 'web-horizontal-cinematic';
-  const heroTitle = String(title).replace(/\s+to\s+/i, '<br/><em>to</em> ');
-  return {
-    title,
-    type: 'web',
-    mode: horizontal ? 'horizontal' : 'scroll',
-    direction: horizontal ? 'horizontal' : 'vertical',
-    theme: design,
-    slides: [
-      { boxes: [
-        box('im-nav-1', 'micro-nav', 'PTML / LLM TO AGENT / 01', 64, 38, 340, 38),
-        box('im-title-1', 'immersive-title', heroTitle, 72, 112, 860, 198),
-        box('im-sub-1', 'immersive-subtitle', 'A premium scroll-native starting point for reports, product narratives, and agent-generated web documents.', 78, 326, 650, 92),
-        box('im-orb-1', 'orbital-system mouse-react', '<span></span><i></i><b></b>', 760, 72, 420, 420),
-        box('im-cta-1', 'magnetic-cta mouse-react', 'Scroll to enter the operating loop', 80, 516, 390, 64),
-        box('im-note-1', 'side-note', 'Default PTML web output: vertical scroll, editable layout, motion-ready surfaces, and one-file export.', 914, 522, 260, 102),
-      ] },
-      { boxes: [
-        box('im-kicker-2', 'micro-nav', '02 / SCROLL AS STORY', 64, 44, 380, 38),
-        box('im-title-2', 'immersive-heading', 'A document that feels like a product surface.', 72, 110, 760, 132),
-        box('im-card-2a', 'glass-panel depth-card mouse-react', '<strong>Intent</strong><br/>The user asks for an outcome, not just an answer.', 90, 324, 330, 160),
-        box('im-card-2b', 'glass-panel depth-card mouse-react', '<strong>Tools</strong><br/>The agent reads, edits, executes, browses, and verifies.', 476, 260, 330, 160),
-        box('im-card-2c', 'glass-panel depth-card mouse-react', '<strong>Evidence</strong><br/>The final report shows what was actually checked.', 862, 324, 330, 160),
-        box('im-thread-2', 'motion-thread', '', 230, 536, 820, 20),
-      ] },
-      { boxes: [
-        box('im-kicker-3', 'micro-nav', '03 / AGENT SURFACE', 64, 44, 360, 38),
-        box('im-title-3', 'immersive-heading', 'Readable for humans. Structured for agents.', 72, 104, 760, 124),
-        box('im-console-3', 'agent-console mouse-react', '<code>goal.detect()</code><br/><code>context.load()</code><br/><code>tools.execute()</code><br/><code>motion.render()</code><br/><code>artifact.export()</code>', 86, 306, 430, 270),
-        box('im-body-3', 'large-copy', 'PTML keeps the final artifact editable while preserving a stable JSON/runtime convention. That means a designer can polish it, a manager can read it, and an agent can safely modify it later.', 620, 312, 520, 210),
-      ] },
-      { boxes: [
-        box('im-kicker-4', 'micro-nav', '04 / OUTPUT', 64, 44, 260, 38),
-        box('im-title-4', 'immersive-heading', 'One file. Multiple formats. Motion included.', 72, 114, 780, 120),
-        box('im-card-4a', 'format-card mouse-react', '<b>01</b><strong>Default</strong><span>Vertical immersive scroll for web documents and internal publishing.</span>', 86, 332, 310, 190),
-        box('im-card-4b', 'format-card mouse-react', '<b>02</b><strong>Web</strong><span>Premium landing-page motion and mouse-reactive surfaces.</span>', 486, 286, 310, 190),
-        box('im-card-4c', 'format-card mouse-react', '<b>03</b><strong>Track</strong><span>Optional horizontal scroll for PPT-like progression.</span>', 886, 332, 310, 190),
-      ] },
-    ],
-  };
+  return createWebDeck(title, design);
 }
 
 function createStarterDeck(name, type = 'presentation', design) {
@@ -301,7 +297,6 @@ function createStarterDeck(name, type = 'presentation', design) {
   const resolvedDesign = resolveDesign(resolvedType, design || undefined);
   if (resolvedType === 'report') return createReportDeck(title, resolvedDesign);
   if (resolvedType === 'document') return createDocumentDeck(title, resolvedDesign);
-  if (resolvedType === 'web' && (resolvedDesign === 'web-immersive' || resolvedDesign === 'web-horizontal-cinematic')) return createImmersiveWebDeck(title, resolvedDesign);
   if (resolvedType === 'web') return createWebDeck(title, resolvedDesign);
   return createPresentationDeck(title, resolvedDesign);
 }
@@ -315,7 +310,7 @@ function buildStandaloneHtml(deck, options = {}) {
   const js = fs.readFileSync(path.join(PKG_DIR, 'runtime/phtml.js'), 'utf8');
   const bridgeLine = options.agentBridge ? `, agentBridge: ${JSON.stringify(options.agentBridge)}` : '';
   const deckClass = scrollMode ? 'phtml-deck flow' : 'phtml-deck';
-  const hint = scrollMode ? (scrollAxis === 'horizontal' ? 'E: edit · wheel/trackpad: horizontal story · Export HTML' : 'E: edit · scroll: read · Export HTML') : 'E: edit · arrows: navigate · Export HTML: share as one file';
+  const hint = scrollMode ? 'E: edit · scroll: read · immersive effects · Export HTML' : 'E: edit · arrows: navigate · Export HTML: share as one file';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -340,7 +335,7 @@ function serve(args) {
   const doOpen = args.includes('--open') || args.includes('-o');
   const server = http.createServer((req, res) => {
     let urlPath = req.url.split('?')[0];
-    if (urlPath === '/') urlPath = '/examples/llm-to-agent/web-immersive.html';
+    if (urlPath === '/') urlPath = '/examples/llm-to-agent/web-warm-paper.html';
     const filePath = path.join(PKG_DIR, urlPath);
     if (!filePath.startsWith(PKG_DIR)) { res.writeHead(403); res.end('Forbidden'); return; }
     fs.readFile(filePath, (err, data) => {
@@ -359,7 +354,7 @@ function serve(args) {
     const url = `http://localhost:${port}`;
     console.log('\n  PTML Runtime\n');
     console.log(`  Local:   ${url}`);
-    console.log(`  Example: ${url}/examples/llm-to-agent/web-immersive.html`);
+    console.log(`  Example: ${url}/examples/llm-to-agent/web-warm-paper.html`);
     console.log('\n  Press Ctrl+C to stop\n');
     if (doOpen) openBrowser(url);
   });
@@ -454,5 +449,5 @@ switch (cmd) {
     console.log(availableThemes().join('\n'));
     break;
   default:
-    console.log(`ptml <command>\n\nCommands:\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                         Create one standalone editable HTML file\n  init [name] [--type type] [--design name]\n                         Create a PTML project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  designs                List installed designs/themes\n  version, --version     Print installed version\n\nExamples:\n  ptml new llm-report.html --type report --design analyst-light\n  ptml new llm-deck.html --type presentation --design dark-tech\n  ptml new llm-doc.html --type document --design simple-doc\n  ptml new llm-site.html --type web --design immersive\n  ptml new llm-track.html --type web --design horizontal\n`);
+    console.log(`ptml <command>\n\nCommands:\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                         Create one standalone editable HTML file\n  init [name] [--type type] [--design name]\n                         Create a PTML project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  designs                List installed designs/themes\n  version, --version     Print installed version\n\nExamples:\n  ptml new llm-report.html --type report --design analyst-light\n  ptml new llm-deck.html --type presentation --design dark-tech\n  ptml new llm-doc.html --type document --design simple-doc\n  ptml new llm-site.html --type web --design warm-paper\n`);
 }

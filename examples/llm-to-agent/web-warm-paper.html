@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LLM to Agent</title>
+<title>웹 랜딩처럼 읽히고, 보고서처럼 정돈되는 PTML 예제</title>
 <style>:root {
   --phtml-bg: #0f172a;
   --phtml-panel: rgba(15, 23, 42, 0.88);
@@ -305,71 +305,67 @@ body.phtml-edit-mode .phtml-thumbnails { display: none; }
   .phtml-canvas { width: 100% !important; height: 100% !important; }
 }
 
-/* PTML — Web Immersive: default premium vertical scroll + mouse-reactive motion */
+/* PTML — Warm Paper Scroll: report-like landing page with immersive scroll effects */
 :root {
-  --phtml-bg: #05060a;
-  --phtml-panel: rgba(8, 10, 16, .72);
-  --phtml-text: #f7f1e4;
-  --phtml-muted: #a79d8d;
-  --phtml-accent: #d9b875;
-  --phtml-accent-2: #87e7ff;
-  --phtml-accent-3: #b69cff;
-  --phtml-border: rgba(247, 241, 228, .14);
+  --phtml-bg: #fbfaf8;
+  --phtml-sheet: rgba(255, 255, 255, .82);
+  --phtml-paper: #f5efe7;
+  --phtml-text: rgba(25, 24, 22, .94);
+  --phtml-muted: #6f665c;
+  --phtml-soft: #8f867b;
+  --phtml-accent: #c9872a;
+  --phtml-accent-2: #1c6fd8;
+  --phtml-accent-3: #2f9f72;
+  --phtml-border: rgba(45, 36, 25, .12);
+  --phtml-border-soft: rgba(45, 36, 25, .075);
+  --phtml-shadow: 0 18px 58px rgba(53, 43, 31, .10), 0 2px 8px rgba(53, 43, 31, .05);
   --mx: calc((var(--ptml-mouse-x, .5) - .5) * 1px);
   --my: calc((var(--ptml-mouse-y, .5) - .5) * 1px);
+  --scroll: var(--ptml-scroll-y, 0);
 }
 
+html { background: var(--phtml-bg); }
 body {
-  background: var(--phtml-bg);
+  background:
+    radial-gradient(circle at calc(72% + (var(--ptml-mouse-x, .5) - .5) * 18%) 4%, rgba(201, 135, 42, .12), transparent 30vw),
+    radial-gradient(circle at calc(9% - (var(--ptml-mouse-x, .5) - .5) * 12%) 24%, rgba(28, 111, 216, .07), transparent 26vw),
+    linear-gradient(180deg, #fff 0%, var(--phtml-bg) 42%, #f7f3ed 100%);
   color: var(--phtml-text);
-  cursor: crosshair;
+  font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: default;
 }
 
 body::before {
   content: '';
   position: fixed;
-  inset: -22vmax;
-  pointer-events: none;
+  inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(circle at calc(var(--ptml-mouse-x, .5) * 100%) calc(var(--ptml-mouse-y, .5) * 100%), rgba(217, 184, 117, .20), transparent 22vmax),
-    radial-gradient(circle at 76% 18%, rgba(135, 231, 255, .13), transparent 25vmax),
-    radial-gradient(circle at 18% 88%, rgba(182, 156, 255, .10), transparent 28vmax),
-    linear-gradient(120deg, #05060a 0%, #101015 48%, #231a12 100%);
-  transition: background 140ms linear;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(45, 36, 25, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 36, 25, .018) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.7), transparent 74%);
 }
 
 body::after {
   content: '';
   position: fixed;
-  left: var(--ptml-cursor-x, -100px);
-  top: var(--ptml-cursor-y, -100px);
-  z-index: 9999;
+  right: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  z-index: 250;
+  border-radius: 99px;
+  background:
+    linear-gradient(180deg, var(--phtml-accent-2), var(--phtml-accent)) 0 0 / 100% calc(var(--scroll) * 100%) no-repeat,
+    rgba(45, 36, 25, .08);
   pointer-events: none;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 1px solid rgba(217, 184, 117, .72);
-  border-radius: 999px;
-  mix-blend-mode: difference;
-  transition: width .18s ease, height .18s ease, margin .18s ease;
 }
 
 .phtml-slide {
   background: transparent;
   perspective: 1200px;
-}
-
-.phtml-slide::after {
-  content: '';
-  position: absolute;
-  left: 5vw;
-  right: 5vw;
-  bottom: 4vh;
-  height: 1px;
-  pointer-events: none;
-  opacity: .55;
-  background: linear-gradient(90deg, transparent, rgba(217, 184, 117, .32), transparent);
 }
 
 .phtml-canvas {
@@ -379,292 +375,288 @@ body::after {
 }
 
 .phtml-deck.flow .phtml-slide {
-  padding: 7vh 5vw;
+  padding: 7vh 6vw;
   align-items: center;
 }
 
 .phtml-deck.flow .phtml-canvas {
-  filter: saturate(1.03) contrast(1.02);
+  width: min(1120px, 100%);
+  height: 720px;
+  min-height: 620px;
+  margin: 0 auto;
 }
 
-.phtml-box { color: var(--phtml-text); }
+.phtml-box {
+  color: var(--phtml-text);
+  text-wrap: pretty;
+}
 
-.phtml-box.micro-nav {
-  font-size: 12px;
-  letter-spacing: .22em;
-  font-weight: 780;
-  color: var(--phtml-accent);
+.phtml-box.micro-nav,
+.phtml-box.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--phtml-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .74);
+  padding: 8px 12px;
+  font: 740 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  opacity: .92;
+  color: #6f6255;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .9);
 }
 
+.phtml-box.micro-nav::before,
+.phtml-box.pill::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--phtml-accent-3);
+  box-shadow: 0 0 0 4px rgba(47, 159, 114, .12);
+  flex: 0 0 auto;
+}
+
+.phtml-box.warm-title,
+.phtml-box.hero-title,
 .phtml-box.immersive-title {
-  font-size: 98px;
-  line-height: .86;
-  letter-spacing: -.078em;
-  font-weight: 920;
-  text-transform: uppercase;
+  font-size: clamp(38px, 4vw, 52px);
+  line-height: 1.12;
+  letter-spacing: -.048em;
+  font-weight: 700;
   text-wrap: balance;
-  text-shadow: 0 24px 80px rgba(0, 0, 0, .55);
-  transform: translate3d(calc(var(--mx) * -18), calc(var(--my) * -10), 0);
 }
 
-.phtml-box.immersive-title em,
-.phtml-box.immersive-heading em {
-  color: var(--phtml-accent);
-  font-style: normal;
-}
-
+.phtml-box.warm-subtitle,
+.phtml-box.hero-subtitle,
 .phtml-box.immersive-subtitle {
-  font-size: 24px;
-  line-height: 1.32;
-  color: #d8d0c2;
+  font-size: 19px;
+  line-height: 1.72;
+  color: var(--phtml-muted);
   font-weight: 420;
 }
 
+.phtml-box.section-heading,
 .phtml-box.immersive-heading {
-  font-size: 68px;
-  line-height: .95;
-  letter-spacing: -.055em;
-  font-weight: 900;
+  font-size: clamp(31px, 3.1vw, 38px);
+  line-height: 1.16;
+  letter-spacing: -.04em;
+  font-weight: 740;
   text-wrap: balance;
 }
 
+.phtml-box.body,
 .phtml-box.large-copy {
-  font-size: 25px;
-  line-height: 1.48;
-  color: #d7cfc0;
-}
-
-.phtml-box.side-note {
+  font-size: 17px;
+  line-height: 1.75;
   color: var(--phtml-muted);
-  font-size: 15px;
-  line-height: 1.5;
-  border-top: 1px solid var(--phtml-border);
-  padding-top: 18px;
+  font-weight: 430;
 }
 
-.phtml-box.orbital-system {
-  border: 1px solid rgba(217, 184, 117, .20);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(217, 184, 117, .16), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, .035), transparent);
-  box-shadow:
-    inset 0 0 80px rgba(217, 184, 117, .08),
-    0 40px 120px rgba(0, 0, 0, .45);
-  transform: rotateX(calc(var(--my) * -16)) rotateY(calc(var(--mx) * 18));
-}
-
-.phtml-box.orbital-system::before,
-.phtml-box.orbital-system::after {
-  content: '';
-  position: absolute;
-  inset: 12%;
-  border: 1px solid rgba(217, 184, 117, .30);
-  border-radius: 50%;
-  transform: rotate(28deg);
-}
-
-.phtml-box.orbital-system::after {
-  inset: 28%;
-  border-color: rgba(135, 231, 255, .35);
-  transform: rotate(-42deg);
-}
-
-.phtml-box.orbital-system span {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  right: 18%;
-  top: 23%;
-  background: var(--phtml-accent);
-  box-shadow: 0 0 40px var(--phtml-accent);
-}
-
-.phtml-box.orbital-system i {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  left: 25%;
-  bottom: 21%;
-  background: var(--phtml-accent-2);
-  box-shadow: 0 0 34px var(--phtml-accent-2);
-}
-
-.phtml-box.orbital-system b {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 76px;
-  height: 76px;
-  margin: -38px;
-  border-radius: 50%;
-  background: #f6f2e8;
-  box-shadow: 0 0 90px rgba(246, 242, 232, .42);
-}
-
+.phtml-box.cta,
 .phtml-box.magnetic-cta {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(217, 184, 117, .46);
+  border: 1px solid #1f1e1c;
+  background: #1f1e1c;
+  color: #fff;
   border-radius: 999px;
-  background: rgba(217, 184, 117, .105);
-  font-size: 18px;
-  font-weight: 840;
-  color: #f8edce;
-  transform: translate3d(calc(var(--mx) * 10), calc(var(--my) * 8), 0);
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 720;
+  box-shadow: 0 2px 10px rgba(53, 43, 31, .05);
+  transition: transform .18s ease, box-shadow .18s ease;
 }
 
-.phtml-box.magnetic-cta::after {
-  content: '↓';
-  margin-left: 14px;
-  color: var(--phtml-accent);
+.phtml-box.cta:hover,
+.phtml-box.magnetic-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(53, 43, 31, .10);
 }
 
+.phtml-box.report-card,
+.phtml-box.feature-card,
 .phtml-box.glass-panel,
-.phtml-box.agent-console,
 .phtml-box.format-card,
-.phtml-box.signal-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, .108), rgba(255, 255, 255, .034));
+.phtml-box.agent-console,
+.phtml-box.callout,
+.phtml-box.card {
+  background: var(--phtml-sheet);
   border: 1px solid var(--phtml-border);
-  border-radius: 30px;
-  backdrop-filter: blur(18px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 34px 110px rgba(0, 0, 0, .32);
-  padding: 28px 30px;
-  color: #cfc7b8;
+  border-radius: 24px;
+  padding: 22px 24px;
+  box-shadow: var(--phtml-shadow);
+  backdrop-filter: blur(10px);
+  color: var(--phtml-muted);
+  font-size: 16px;
+  line-height: 1.62;
+}
+
+.phtml-box.report-card { border-radius: 30px; padding: 28px; }
+.phtml-box.report-card::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 22px;
+  border: 1px solid rgba(45, 36, 25, .065);
+  pointer-events: none;
+}
+
+.phtml-box.feature-card strong,
+.phtml-box.glass-panel strong,
+.phtml-box.format-card strong,
+.phtml-box.report-card strong,
+.phtml-box.card strong {
+  display: block;
+  color: var(--phtml-text);
+  font-size: 20px;
+  line-height: 1.24;
+  letter-spacing: -.025em;
+  margin-bottom: 8px;
+}
+
+.phtml-box.metric {
+  background: #fbfaf8;
+  border: 1px solid var(--phtml-border-soft);
+  border-radius: 16px;
+  padding: 14px;
+  color: var(--phtml-soft);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.phtml-box.metric b {
+  display: block;
+  color: var(--phtml-text);
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -.04em;
+  margin-bottom: 4px;
+}
+
+.phtml-box.text-flow-demo {
+  background: #f6f1ea;
+  border: 1px solid var(--phtml-border-soft);
+  border-radius: 18px;
+  color: rgba(45, 40, 33, .76);
   font-size: 19px;
-  line-height: 1.42;
+  line-height: 1.55;
+  padding: 24px 28px;
+  overflow: hidden;
 }
 
-.phtml-box.mouse-react {
-  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+.phtml-box.text-flow-demo::before {
+  content: '';
+  position: absolute;
+  width: 112px;
+  height: 112px;
+  right: 46px;
+  top: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 135, 42, .34), rgba(201, 135, 42, .10) 58%, transparent 72%);
+  border: 1px solid rgba(201, 135, 42, .26);
+  transform: translate3d(calc(var(--mx) * 20), calc(var(--my) * 16), 0);
 }
 
-.phtml-box.mouse-react:hover {
-  border-color: rgba(217, 184, 117, .48);
-  background: linear-gradient(135deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .052));
+.phtml-box.text-flow-demo p {
+  margin: 0;
+  max-width: 68%;
+}
+
+.phtml-box.accent,
+.phtml-box.motion-thread {
+  background: rgba(201, 135, 42, .10);
+  border: 1px solid rgba(201, 135, 42, .25);
+  border-radius: 999px;
+  color: #7a551e;
+  font-size: 18px;
+  line-height: 1.45;
+  text-align: center;
+  padding: 18px 26px;
+}
+
+.phtml-box.scroll-rule {
+  border-top: 1px solid var(--phtml-border-soft);
+  color: var(--phtml-soft);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-top: 18px;
+}
+
+.phtml-box.mouse-react,
+.phtml-box.depth-card,
+.phtml-box.report-card {
+  transition: transform .22s ease, border-color .2s ease, box-shadow .2s ease, opacity .65s ease;
+}
+
+.phtml-box.mouse-react:hover,
+.phtml-box.depth-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 135, 42, .24);
+}
+
+.phtml-box.report-card.mouse-react {
+  transform: translate3d(calc(var(--mx) * 9), calc(var(--my) * 7), 0);
 }
 
 .phtml-box.depth-card {
-  transform: translateY(34px) rotateX(8deg);
-  opacity: .35;
-  transition: transform .9s cubic-bezier(.16, 1, .3, 1), opacity .9s;
+  opacity: .25;
+  transform: translateY(30px);
 }
 
-.phtml-slide.visible .phtml-box.depth-card {
-  transform: translateY(0) rotateX(0);
+.phtml-slide.visible .phtml-box.depth-card,
+.phtml-slide.visible .phtml-box.feature-card,
+.phtml-slide.visible .phtml-box.glass-panel,
+.phtml-slide.visible .phtml-box.report-card {
   opacity: 1;
+  transform: translateY(0);
 }
 
-.phtml-box.glass-panel strong,
-.phtml-box.signal-card strong {
-  display: block;
-  color: #fff7df;
-  font-size: 30px;
-  margin-bottom: 14px;
-}
-
-.phtml-box.signal-card b {
-  color: var(--phtml-accent-2);
-  font-weight: 760;
-}
-
-.phtml-box.motion-thread {
-  height: 2px !important;
-  background: linear-gradient(90deg, transparent, var(--phtml-accent), var(--phtml-accent-2), transparent);
-  box-shadow: 0 0 30px rgba(217, 184, 117, .5);
-}
-
-.phtml-box.agent-console {
-  font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace;
-  color: #a7f3d0;
-  font-size: 22px;
-  line-height: 1.75;
-}
-
-.phtml-box.agent-console code { color: #bfffe0; }
-
-.phtml-box.format-card b {
-  display: block;
-  color: var(--phtml-accent);
-  font-size: 14px;
-  letter-spacing: .18em;
-  margin-bottom: 28px;
-}
-
-.phtml-box.format-card strong {
-  display: block;
-  color: #fff;
-  font-size: 34px;
-  margin-bottom: 18px;
-}
-
-.phtml-box.format-card span {
-  color: #cfc7b8;
-  font-size: 18px;
-  line-height: 1.4;
-}
+.phtml-slide.visible .phtml-box:nth-child(1) { transition-delay: .03s; }
+.phtml-slide.visible .phtml-box:nth-child(2) { transition-delay: .09s; }
+.phtml-slide.visible .phtml-box:nth-child(3) { transition-delay: .15s; }
+.phtml-slide.visible .phtml-box:nth-child(4) { transition-delay: .21s; }
+.phtml-slide.visible .phtml-box:nth-child(5) { transition-delay: .27s; }
+.phtml-slide.visible .phtml-box:nth-child(6) { transition-delay: .33s; }
 
 .phtml-status,
 .phtml-hint,
 .phtml-thumbnails {
-  background: rgba(8, 10, 16, .58);
+  background: rgba(255, 255, 255, .78);
   color: var(--phtml-muted);
   border-color: var(--phtml-border);
+  backdrop-filter: blur(12px);
 }
 
 .phtml-thumb.active {
   border-color: var(--phtml-accent);
-  color: var(--phtml-accent);
-  background: rgba(217, 184, 117, .16);
+  color: #7a551e;
+  background: rgba(201, 135, 42, .12);
 }
 
-@media (max-width: 760px) {
-  .phtml-box.immersive-title { font-size: 72px; }
-  .phtml-box.immersive-heading { font-size: 48px; }
-  body::after { display: none; }
+@media (max-width: 900px) {
+  .phtml-deck.flow .phtml-slide { padding: 6vh 20px; }
+  .phtml-box.warm-title,
+  .phtml-box.hero-title,
+  .phtml-box.immersive-title { font-size: 38px; }
+  .phtml-box.section-heading,
+  .phtml-box.immersive-heading { font-size: 30px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-  }
+  .phtml-box,
+  .phtml-box::before,
+  .phtml-box::after { transition: none !important; transform: none !important; }
 }
-
-/* Horizontal cinematic overrides */
-body.phtml-horizontal-scroll::before {
-  background:
-    radial-gradient(circle at calc(var(--ptml-mouse-x, .5) * 100%) calc(var(--ptml-mouse-y, .5) * 100%), rgba(135,231,255,.17), transparent 22vmax),
-    radial-gradient(circle at 78% 50%, rgba(217,184,117,.12), transparent 26vmax),
-    linear-gradient(90deg, #05070b 0%, #151018 40%, #20150d 72%, #06070a 100%);
-}
-body.phtml-horizontal-scroll .phtml-deck.flow .phtml-slide { padding: 7vh 6vw; }
-body.phtml-horizontal-scroll .phtml-slide::before {
-  content: '';
-  position: absolute;
-  inset: 10vh auto 10vh -1px;
-  width: 1px;
-  background: linear-gradient(transparent, rgba(217,184,117,.45), transparent);
-}
-body.phtml-horizontal-scroll .phtml-box.immersive-title { font-size: 90px; }
-body.phtml-horizontal-scroll .phtml-box.motion-thread { background: linear-gradient(90deg, var(--phtml-accent), transparent 22%, var(--phtml-accent-2), transparent); }
-body.phtml-horizontal-scroll .phtml-thumbnails { left: auto; right: 28px; transform: none; }
-body.phtml-horizontal-scroll .phtml-box.magnetic-cta::after { content: '→'; }
 </style>
 </head>
 <body class="ptml-web">
-<div class="phtml-hint">E: edit · wheel/trackpad: horizontal story · Export HTML</div>
+<div class="phtml-hint">E: edit · scroll: read · immersive effects · Export HTML</div>
 <div class="phtml-status"></div>
 <main class="phtml-deck flow"></main>
-<script id="phtml-deck-data" type="application/json">{"title":"LLM to Agent","type":"web","mode":"horizontal","direction":"horizontal","theme":"web-horizontal-cinematic","slides":[{"boxes":[{"id":"im-nav-1","className":"phtml-box micro-nav","html":"PTML / LLM TO AGENT / 01","x":64,"y":38,"w":340,"h":38},{"id":"im-title-1","className":"phtml-box immersive-title","html":"LLM\u003cbr/\u003e\u003cem\u003eto\u003c/em\u003e Agent","x":72,"y":112,"w":860,"h":198},{"id":"im-sub-1","className":"phtml-box immersive-subtitle","html":"A premium scroll-native starting point for reports, product narratives, and agent-generated web documents.","x":78,"y":326,"w":650,"h":92},{"id":"im-orb-1","className":"phtml-box orbital-system mouse-react","html":"\u003cspan\u003e\u003c/span\u003e\u003ci\u003e\u003c/i\u003e\u003cb\u003e\u003c/b\u003e","x":760,"y":72,"w":420,"h":420},{"id":"im-cta-1","className":"phtml-box magnetic-cta mouse-react","html":"Scroll to enter the operating loop","x":80,"y":516,"w":390,"h":64},{"id":"im-note-1","className":"phtml-box side-note","html":"Default PTML web output: vertical scroll, editable layout, motion-ready surfaces, and one-file export.","x":914,"y":522,"w":260,"h":102}]},{"boxes":[{"id":"im-kicker-2","className":"phtml-box micro-nav","html":"02 / SCROLL AS STORY","x":64,"y":44,"w":380,"h":38},{"id":"im-title-2","className":"phtml-box immersive-heading","html":"A document that feels like a product surface.","x":72,"y":110,"w":760,"h":132},{"id":"im-card-2a","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eIntent\u003c/strong\u003e\u003cbr/\u003eThe user asks for an outcome, not just an answer.","x":90,"y":324,"w":330,"h":160},{"id":"im-card-2b","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eTools\u003c/strong\u003e\u003cbr/\u003eThe agent reads, edits, executes, browses, and verifies.","x":476,"y":260,"w":330,"h":160},{"id":"im-card-2c","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eEvidence\u003c/strong\u003e\u003cbr/\u003eThe final report shows what was actually checked.","x":862,"y":324,"w":330,"h":160},{"id":"im-thread-2","className":"phtml-box motion-thread","html":"","x":230,"y":536,"w":820,"h":20}]},{"boxes":[{"id":"im-kicker-3","className":"phtml-box micro-nav","html":"03 / AGENT SURFACE","x":64,"y":44,"w":360,"h":38},{"id":"im-title-3","className":"phtml-box immersive-heading","html":"Readable for humans. Structured for agents.","x":72,"y":104,"w":760,"h":124},{"id":"im-console-3","className":"phtml-box agent-console mouse-react","html":"\u003ccode\u003egoal.detect()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003econtext.load()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003etools.execute()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003emotion.render()\u003c/code\u003e\u003cbr/\u003e\u003ccode\u003eartifact.export()\u003c/code\u003e","x":86,"y":306,"w":430,"h":270},{"id":"im-body-3","className":"phtml-box large-copy","html":"PTML keeps the final artifact editable while preserving a stable JSON/runtime convention. That means a designer can polish it, a manager can read it, and an agent can safely modify it later.","x":620,"y":312,"w":520,"h":210}]},{"boxes":[{"id":"im-kicker-4","className":"phtml-box micro-nav","html":"04 / OUTPUT","x":64,"y":44,"w":260,"h":38},{"id":"im-title-4","className":"phtml-box immersive-heading","html":"One file. Multiple formats. Motion included.","x":72,"y":114,"w":780,"h":120},{"id":"im-card-4a","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e01\u003c/b\u003e\u003cstrong\u003eDefault\u003c/strong\u003e\u003cspan\u003eVertical immersive scroll for web documents and internal publishing.\u003c/span\u003e","x":86,"y":332,"w":310,"h":190},{"id":"im-card-4b","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e02\u003c/b\u003e\u003cstrong\u003eWeb\u003c/strong\u003e\u003cspan\u003ePremium landing-page motion and mouse-reactive surfaces.\u003c/span\u003e","x":486,"y":286,"w":310,"h":190},{"id":"im-card-4c","className":"phtml-box format-card mouse-react","html":"\u003cb\u003e03\u003c/b\u003e\u003cstrong\u003eTrack\u003c/strong\u003e\u003cspan\u003eOptional horizontal scroll for PPT-like progression.\u003c/span\u003e","x":886,"y":332,"w":310,"h":190}]}]}</script>
+<script id="phtml-deck-data" type="application/json">{"title":"웹 랜딩처럼 읽히고, 보고서처럼 정돈되는 PTML 예제","type":"web","mode":"scroll","direction":"vertical","theme":"web-warm-paper","slides":[{"boxes":[{"id":"wp-pill-1","className":"phtml-box pill","html":"WARM PAPER / SCROLL ACTION","x":78,"y":68,"w":360,"h":48},{"id":"wp-title-1","className":"phtml-box warm-title","html":"웹 랜딩처럼 읽히고, 보고서처럼 정돈되는 PTML 예제","x":76,"y":146,"w":680,"h":188},{"id":"wp-sub-1","className":"phtml-box warm-subtitle","html":"A scroll-native PTML starter that reads like a web landing page and stays disciplined like an internal report. Typography, line length, and spacing come first; motion is layered on top.","x":80,"y":360,"w":650,"h":142},{"id":"wp-cta-1","className":"phtml-box cta mouse-react","html":"Read the scroll report","x":82,"y":556,"w":260,"h":58},{"id":"wp-card-1","className":"phtml-box report-card mouse-react","html":"\u003cstrong\u003eTitle stays contained.\u003c/strong\u003e Big enough for a landing hero, restrained enough for a report. Body text keeps a readable width instead of filling every box.","x":790,"y":132,"w":346,"h":230},{"id":"wp-flow-1","className":"phtml-box text-flow-demo","html":"\u003cp\u003ePHTML is a readable scroll document. Paragraphs breathe; cards support; the immersive layer reacts lightly.\u003c/p\u003e","x":786,"y":404,"w":360,"h":216}]},{"boxes":[{"id":"wp-kicker-2","className":"phtml-box micro-nav","html":"02 / LAYOUT BEFORE EFFECTS","x":78,"y":66,"w":360,"h":38},{"id":"wp-title-2","className":"phtml-box section-heading","html":"글자 크기와 배치를 먼저 정하고, 장식은 나중에 붙입니다.","x":78,"y":126,"w":640,"h":100},{"id":"wp-body-2","className":"phtml-box body","html":"The default template uses a report-like rhythm: moderate headings, 16–19px body copy, readable measure, and section spacing instead of oversized PPT blocks.","x":82,"y":262,"w":650,"h":128},{"id":"wp-rule-2","className":"phtml-box scroll-rule","html":"Rule of thumb: hero title 42–58px, section heading 31–38px, body 17–19px, paragraph width 620–720px.","x":82,"y":488,"w":620,"h":96},{"id":"wp-card-2a","className":"phtml-box feature-card depth-card mouse-react","html":"\u003cstrong\u003eReadable width\u003c/strong\u003eLong text never stretches across the whole canvas. It sits in a predictable column.","x":780,"y":140,"w":320,"h":150},{"id":"wp-card-2b","className":"phtml-box feature-card depth-card mouse-react","html":"\u003cstrong\u003eSoft separation\u003c/strong\u003eUse whitespace, lines, and paper cards before heavy decoration.","x":780,"y":330,"w":320,"h":150},{"id":"wp-card-2c","className":"phtml-box feature-card depth-card mouse-react","html":"\u003cstrong\u003eNo overflow\u003c/strong\u003eDefault box sizes are conservative so edited text has room to breathe.","x":780,"y":520,"w":320,"h":150}]},{"boxes":[{"id":"wp-kicker-3","className":"phtml-box micro-nav","html":"03 / IMMERSIVE LAYER","x":78,"y":66,"w":330,"h":38},{"id":"wp-title-3","className":"phtml-box section-heading","html":"Immersive는 별도 양식이 아니라 문서 위에 얹는 반응 레이어입니다.","x":78,"y":126,"w":700,"h":108},{"id":"wp-body-3","className":"phtml-box body","html":"Scroll reveal, pointer-reactive light, floating cards, and pretext-like text flow are welcome by default. The document still stays vertical, calm, and editable.","x":82,"y":270,"w":650,"h":120},{"id":"wp-flow-3","className":"phtml-box text-flow-demo mouse-react","html":"\u003cp\u003ePretext-style motion can make words flow around an object. In PTML, that belongs as a subtle effect sample — not as a reason to distort the report layout.\u003c/p\u003e","x":82,"y":456,"w":560,"h":168},{"id":"wp-card-3a","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eScroll action\u003c/strong\u003eSections reveal as the reader moves down the page.","x":748,"y":170,"w":330,"h":144},{"id":"wp-card-3b","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003ePointer reaction\u003c/strong\u003eBackground light and cards move only a few pixels.","x":748,"y":362,"w":330,"h":144},{"id":"wp-card-3c","className":"phtml-box glass-panel depth-card mouse-react","html":"\u003cstrong\u003eExport-safe\u003c/strong\u003eEverything remains one editable HTML file.","x":748,"y":554,"w":330,"h":116}]},{"boxes":[{"id":"wp-kicker-4","className":"phtml-box micro-nav","html":"04 / OUTPUT","x":78,"y":66,"w":260,"h":38},{"id":"wp-title-4","className":"phtml-box section-heading","html":"One warm paper template for web reports, product narratives, and internal docs.","x":78,"y":132,"w":710,"h":110},{"id":"wp-body-4","className":"phtml-box body","html":"Older web templates are folded into this single default direction: scrollable, clean, report-like, and motion-ready.","x":82,"y":286,"w":640,"h":110},{"id":"wp-card-4a","className":"phtml-box format-card depth-card mouse-react","html":"\u003cstrong\u003eSimple by default\u003c/strong\u003e\u003cspan\u003eWarm paper, calm typography, and readable sections.\u003c/span\u003e","x":760,"y":150,"w":320,"h":154},{"id":"wp-card-4b","className":"phtml-box format-card depth-card mouse-react","html":"\u003cstrong\u003eImmersive when useful\u003c/strong\u003e\u003cspan\u003eReveal, parallax, cursor light, and text-flow effects stay optional layers.\u003c/span\u003e","x":760,"y":354,"w":320,"h":166},{"id":"wp-accent-4","className":"phtml-box accent","html":"PTML starts as a scroll report, then becomes expressive where the story needs it.","x":126,"y":544,"w":820,"h":74}]}]}</script>
 <script>// PHTML Runtime v1.0
 
 (function () {
@@ -1653,6 +1645,6 @@ ${toolbarHtml()}
   Object.assign(window, window.PHTML);
 })();
 </script>
-<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: true, scrollAxis: 'horizontal' });</script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: true, scrollAxis: 'vertical' });</script>
 </body>
 </html>

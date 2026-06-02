@@ -2,7 +2,7 @@
 
 ```bash
 npm install -g @imejaim/ptml
-ptml new my-site.html --type web --title "My Immersive Page"
+ptml new my-site.html --type web --title "My Scroll Report"
 ```
 
 PTML is an installable editable HTML runtime for presentations, scrollable reports, simple documents, and immersive web-style pages.
@@ -24,14 +24,14 @@ phtml --version
 
 `ptml` is the preferred product/CLI name. `phtml` remains an alias for compatibility.
 
-## Quick start: immersive editable HTML anywhere
+## Quick start: warm paper scroll HTML anywhere
 
 ```bash
-ptml new my-site.html --type web --title "My Immersive Page"
+ptml new my-site.html --type web --title "My Scroll Report"
 open my-site.html
 ```
 
-The default `--type web` design is immersive. Open the generated standalone HTML file in a browser, press **E** to edit, then use **Export HTML** to save/share the edited version.
+The default `--type web` design is a warm-paper, vertical scroll template: landing-page polish, report-like typography, and subtle immersive effects. Open the generated standalone HTML file in a browser, press **E** to edit, then use **Export HTML** to save/share the edited version.
 
 GitHub install fallback:
 
@@ -45,9 +45,8 @@ npm install -g git+ssh://git@github.com/imejaim/phtml-runtime.git
 ptml new llm-deck.html --type presentation --design dark-tech --title "LLM to Agent"
 ptml new llm-report.html --type report --design analyst-light --title "LLM to Agent Analysis Report"
 ptml new llm-memo.html --type document --design simple-doc --title "LLM to Agent Operating Memo"
-ptml new llm-web.html --type web --title "LLM to Agent"                 # default: immersive
-ptml new llm-modern.html --type web --design modern --title "LLM to Agent"  # simpler web style
-ptml new llm-horizontal.html --type web --design horizontal --title "LLM to Agent"
+ptml new llm-web.html --type web --title "LLM to Agent"                 # default: warm-paper scroll
+ptml new llm-paper.html --type web --design warm-paper --title "LLM to Agent"
 ```
 
 Each output is a single HTML file:
@@ -64,9 +63,7 @@ Each output is a single HTML file:
 - `presentation`: slide/deck mode, large visual typography, arrow navigation.
 - `report`: scroll mode, executive summary, KPI cards, insight/recommendation/risk blocks.
 - `document`: scroll mode, long-form memo/spec style, readable text and callouts.
-- `web`: default immersive vertical scroll, landing-page/product-page style sections, reveal motion, and mouse-reactive surfaces.
-- `web` with `--design modern`: simpler landing-page style.
-- `web` with `--design horizontal`: optional sideways, PPT-like cinematic track using the mouse wheel/trackpad.
+- `web`: default warm-paper vertical scroll, landing-page/report typography, reveal motion, mouse-reactive surfaces, and pretext-like text-flow samples.
 
 ## Designs/themes
 
@@ -83,9 +80,7 @@ Current design files:
 - `presentation-editorial-light`
 - `report-analyst-light`
 - `document-simple`
-- `web-modern`
-- `web-immersive`
-- `web-horizontal-cinematic`
+- `web-warm-paper`
 
 Backward-compatible theme names are also kept:
 
@@ -100,9 +95,9 @@ Design aliases:
 --design editorial-light # presentation-editorial-light
 --design analyst-light  # report-analyst-light
 --design simple-doc     # document-simple
---design modern         # web-modern, simpler web style
---design immersive      # web-immersive, also the default for --type web
---design horizontal     # web-horizontal-cinematic
+--design warm-paper     # web-warm-paper, also the default for --type web
+--design immersive      # alias to web-warm-paper
+--design modern         # alias to web-warm-paper
 ```
 
 ## Included examples
@@ -114,9 +109,7 @@ examples/llm-to-agent/presentation-dark-tech.html
 examples/llm-to-agent/presentation-editorial-light.html
 examples/llm-to-agent/report-analyst-light.html
 examples/llm-to-agent/document-simple.html
-examples/llm-to-agent/web-modern.html
-examples/llm-to-agent/web-immersive.html
-examples/llm-to-agent/web-horizontal-cinematic.html
+examples/llm-to-agent/web-warm-paper.html
 ```
 
 Serve them locally:
@@ -125,7 +118,7 @@ Serve them locally:
 ptml serve --open
 ```
 
-The default server page opens the immersive web example.
+The default server page opens the warm-paper scroll web example.
 
 ## CLI
 

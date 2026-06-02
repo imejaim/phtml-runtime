@@ -3,164 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLM to Agent — PHTML Runtime</title>
-  <link rel="stylesheet" href="../../runtime/phtml.css" />
-  <link rel="stylesheet" href="../../themes/editorial-dark.css" />
+  <title>PTML Warm Paper Example</title>
+  <meta http-equiv="refresh" content="0; url=web-warm-paper.html" />
   <style>
-    body { background: #0a0a0a; overflow: hidden; }
-
-    /* ── Entrance animations (scroll-triggered via .visible class) ── */
-    .phtml-box {
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #fbfaf8;
+      color: rgba(25,24,22,.94);
+      font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .phtml-slide.visible .phtml-box           { opacity: 1; transform: none; }
-    .phtml-slide.visible .phtml-box:nth-child(1) { transition-delay: 0.04s; }
-    .phtml-slide.visible .phtml-box:nth-child(2) { transition-delay: 0.13s; }
-    .phtml-slide.visible .phtml-box:nth-child(3) { transition-delay: 0.22s; }
-    .phtml-slide.visible .phtml-box:nth-child(4) { transition-delay: 0.31s; }
-    .phtml-slide.visible .phtml-box:nth-child(5) { transition-delay: 0.40s; }
-    .phtml-slide.visible .phtml-box:nth-child(6) { transition-delay: 0.49s; }
-    .phtml-slide.visible .phtml-box:nth-child(7) { transition-delay: 0.58s; }
-
-    /* Edit mode: skip animations */
-    .phtml-edit-mode .phtml-box {
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-    }
-
-    /* ── Side progress bar ─────────────────────────────────────── */
-    #phtml-progress {
-      position: fixed;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 300;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      pointer-events: auto;
-    }
-    .pp-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-    }
-    .pp-dot.active {
-      background: #ff4f2a;
-      height: 16px;
-      border-radius: 2px;
-    }
-
-    /* ── Smoke canvas ──────────────────────────────────────────── */
-    #smoke {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.45;
-    }
-
-    .phtml-deck,
-    .phtml-toolbar,
-    .phtml-status,
-    .phtml-hint,
-    .phtml-thumbnails { z-index: 2; position: relative; }
-
-    .phtml-box.title { white-space: pre-line; }
+    a { color: #1c6fd8; font-weight: 700; }
   </style>
 </head>
 <body>
-  <canvas id="smoke"></canvas>
-  <div id="phtml-progress"></div>
-
-  <div class="phtml-hint">스크롤 또는 ↑↓로 탐색 · E: 편집 모드</div>
-  <div class="phtml-status"></div>
-  <main class="phtml-deck"></main>
-
-  <script src="../../runtime/phtml.js"></script>
-  <script>
-    (async () => {
-      await PHTML.init({
-        deckUrl: '../../decks/llm-to-agent.json',
-        agentBridge: 'ws://localhost:8787',
-        scrollMode: true,
-      });
-
-      // Build side progress dots
-      const slides = [...document.querySelectorAll('.phtml-slide')];
-      const progressEl = document.getElementById('phtml-progress');
-
-      slides.forEach((slide, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'pp-dot' + (i === 0 ? ' active' : '');
-        dot.title = `Slide ${i + 1}`;
-        dot.onclick = () => slide.scrollIntoView({ behavior: 'smooth' });
-        progressEl.appendChild(dot);
-      });
-
-      // Keep dots in sync via body scroll
-      document.body.addEventListener('scroll', () => {
-        const idx = slides.findIndex(s => s.classList.contains('visible'));
-        if (idx >= 0) {
-          document.querySelectorAll('.pp-dot').forEach((d, i) => {
-            d.classList.toggle('active', i === idx);
-          });
-        }
-      }, { passive: true });
-    })();
-
-    // ── Smoke particles ─────────────────────────────────────────
-    const canvas = document.getElementById('smoke');
-    const ctx = canvas.getContext('2d', { alpha: true });
-    const pts = [];
-
-    function resize() {
-      canvas.width = innerWidth * devicePixelRatio;
-      canvas.height = innerHeight * devicePixelRatio;
-      canvas.style.width = innerWidth + 'px';
-      canvas.style.height = innerHeight + 'px';
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    }
-
-    function addPt(x, y) {
-      for (let i = 0; i < 2; i++)
-        pts.push({ x, y, vx: (Math.random()-.5)*.9, vy: (Math.random()-.5)*.9, r: 10+Math.random()*24, life: 1 });
-      if (pts.length > 160) pts.splice(0, pts.length - 160);
-    }
-
-    (function loop() {
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      ctx.globalCompositeOperation = 'screen';
-      for (let i = pts.length - 1; i >= 0; i--) {
-        const p = pts[i];
-        p.x += p.vx; p.y += p.vy; p.vx *= .98; p.vy *= .98; p.r += .22; p.life -= .011;
-        if (p.life <= 0) { pts.splice(i, 1); continue; }
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, `rgba(255,79,42,${.04*p.life})`);
-        g.addColorStop(.5, `rgba(180,40,10,${.018*p.life})`);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-      }
-      requestAnimationFrame(loop);
-    })();
-
-    let lastT = 0;
-    addEventListener('pointermove', e => {
-      const now = performance.now();
-      if (now - lastT > 24) { addPt(e.clientX, e.clientY); lastT = now; }
-    });
-    setInterval(() => { if (pts.length < 40) addPt(Math.random()*innerWidth, Math.random()*innerHeight); }, 800);
-    resize();
-    addEventListener('resize', resize);
-  </script>
+  <p>Opening the PTML Warm Paper scroll example… <a href="web-warm-paper.html">Open manually</a></p>
 </body>
 </html>
