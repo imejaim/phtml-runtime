@@ -12,6 +12,9 @@ const PACKAGE_IMPORT_NAME = PKG.name || '@imejaim/ptml';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
+  '.htm': 'text/html; charset=utf-8',
+  // Compatibility rescue only. Browser-ready PTML artifacts should be .html.
+  '.ptml': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
@@ -57,6 +60,68 @@ const DESIGN_PRESETS = {
   },
 };
 
+const DESIGN_INFO = {
+  'dark-tech': {
+    type: 'presentation', aliases: ['presentation-dark-tech'],
+    description: 'Backward-compatible dark tech presentation theme.',
+    recommendedFor: ['발표', '슬라이드', 'legacy deck'],
+  },
+  'editorial-dark': {
+    type: 'presentation', aliases: ['presentation-editorial-dark'],
+    description: 'Backward-compatible editorial dark presentation theme.',
+    recommendedFor: ['발표', '스토리텔링'],
+  },
+  'editorial-light': {
+    type: 'presentation', aliases: ['presentation-editorial-light'],
+    description: 'Backward-compatible editorial light presentation theme.',
+    recommendedFor: ['발표', '교육자료'],
+  },
+  'presentation-dark-tech': {
+    type: 'presentation', defaultFor: 'presentation', aliases: ['dark-tech'],
+    description: 'Dark technology presentation deck with strong contrast and slide navigation.',
+    recommendedFor: ['발표', '슬라이드', 'deck', 'technical presentation'],
+  },
+  'presentation-editorial-dark': {
+    type: 'presentation', aliases: ['editorial-dark'],
+    description: 'Editorial dark presentation style for narrative decks.',
+    recommendedFor: ['발표', '스토리텔링', 'executive deck'],
+  },
+  'presentation-editorial-light': {
+    type: 'presentation', aliases: ['editorial-light'],
+    description: 'Clean editorial light deck for readable presentation material.',
+    recommendedFor: ['발표', '교육자료', 'light deck'],
+  },
+  'report-analyst-light': {
+    type: 'report', defaultFor: 'report', aliases: ['analyst-light'],
+    description: 'Executive analysis report with KPI cards, insight, recommendation, and risk blocks.',
+    recommendedFor: ['보고서', '레포트', '분석', 'executive summary'],
+  },
+  'document-simple': {
+    type: 'document', defaultFor: 'document', aliases: ['simple', 'simple-doc'],
+    description: 'Long-form memo/spec document with readable prose and callouts.',
+    recommendedFor: ['문서', '메모', 'spec', 'internal note'],
+  },
+  'web-warm-paper': {
+    type: 'web', defaultFor: 'web', aliases: ['warm-paper', 'warm', 'paper', 'immersive', 'modern'],
+    description: 'Warm paper scroll page: report-like typography plus subtle immersive motion.',
+    recommendedFor: ['스크롤 리포트', '웹페이지', '랜딩', '보기 좋은 보고서'],
+  },
+};
+
+const TYPE_ALIASES = {
+  report: 'report', reports: 'report', '보고서': 'report', '레포트': 'report', analysis: 'report', analyst: 'report',
+  document: 'document', doc: 'document', memo: 'document', spec: 'document', '문서': 'document', '메모': 'document',
+  presentation: 'presentation', deck: 'presentation', slides: 'presentation', slide: 'presentation', '발표': 'presentation', '슬라이드': 'presentation',
+  web: 'web', site: 'web', page: 'web', landing: 'web', '웹': 'web', '웹페이지': 'web', immersive: 'web',
+};
+
+const DEFAULT_FILENAMES = {
+  presentation: 'ptml-deck.html',
+  report: 'ptml-report.html',
+  document: 'ptml-document.html',
+  web: 'ptml-web.html',
+};
+
 function openBrowser(url) {
   const cmd = process.platform === 'win32' ? 'start' : process.platform === 'darwin' ? 'open' : 'xdg-open';
   try { execSync(`${cmd} ${url}`); } catch (_) {}
@@ -69,6 +134,21 @@ function getFlag(args, name, fallback = undefined) {
 }
 
 function hasFlag(args, name) { return args.includes(name); }
+
+function removeFlagWithValue(args, name) {
+  const out = [];
+  for (let i = 0; i < args.length; i += 1) {
+    if (args[i] === name) { i += 1; continue; }
+    out.push(args[i]);
+  }
+  return out;
+}
+
+function stripFlags(args, flags) {
+  let out = [...args];
+  for (const flag of flags) out = removeFlagWithValue(out, flag).filter((arg) => arg !== flag);
+  return out;
+}
 
 function positionalArgs(args) {
   const out = [];
@@ -131,6 +211,57 @@ function resolveDesign(type, value) {
     process.exit(1);
   }
   return design;
+}
+
+function normalizeHtmlOutputPath(fileName, args = []) {
+  const requested = fileName || 'deck.html';
+  const ext = path.extname(requested).toLowerCase();
+  const allowNonHtml = hasFlag(args, '--allow-non-html-extension');
+  if (!ext) return `${requested}.html`;
+  if (ext === '.html' || ext === '.htm') return requested;
+  if (allowNonHtml) return requested;
+  if (ext === '.ptml' || ext === '.phtml') {
+    console.error('PTML/PHTML is the runtime/CLI name, not the browser-ready output extension.');
+    console.error('Use a .html filename, e.g. ptml report report.html');
+    console.error('.ptml is reserved for a future source format; .phtml can conflict with PHP/PHTML servers.');
+  } else {
+    console.error(`Unsupported output extension: ${ext}`);
+    console.error('Standalone editable PTML artifacts must be browser-ready .html files.');
+  }
+  console.error('Override only if you know what you are doing: --allow-non-html-extension');
+  process.exit(1);
+}
+
+function firstFileArgOrDefault(args, type) {
+  const pos = positionalArgs(stripFlags(args, ['--title', '--type', '--design', '--theme', '--agent-bridge', '--out', '-o']));
+  const explicitOut = getFlag(args, '--out', getFlag(args, '-o', undefined));
+  if (explicitOut) return explicitOut;
+  const first = pos[0];
+  if (!first) return DEFAULT_FILENAMES[type] || 'ptml-output.html';
+  const ext = path.extname(first).toLowerCase();
+  if (ext || first.includes('/') || first.includes('\\\\')) return first;
+  if (pos.length === 1 && /[\s가-힣]/.test(first)) return DEFAULT_FILENAMES[type] || 'ptml-output.html';
+  return first;
+}
+
+function titleFromArgs(args, fallback) {
+  const flagTitle = getFlag(args, '--title', undefined);
+  if (flagTitle) return flagTitle;
+  const pos = positionalArgs(stripFlags(args, ['--type', '--design', '--theme', '--agent-bridge', '--out', '-o']));
+  if (!pos.length) return fallback;
+  const first = pos[0];
+  const firstLooksLikeFile = path.extname(first) || first.includes('/') || first.includes('\\\\');
+  const titleParts = firstLooksLikeFile ? pos.slice(1) : pos;
+  return titleParts.length ? titleParts.join(' ') : fallback;
+}
+
+function inferTypeFromText(text) {
+  const clean = String(text || '').toLowerCase();
+  if (/보고서|레포트|리포트|분석|report|analysis|analyst/.test(clean)) return 'report';
+  if (/웹|랜딩|홈페이지|web|site|landing|page|immersive/.test(clean)) return 'web';
+  if (/발표|슬라이드|프레젠테이션|deck|slide|presentation/.test(clean)) return 'presentation';
+  if (/문서|메모|스펙|document|memo|spec|doc/.test(clean)) return 'document';
+  return 'report';
 }
 
 function themePath(theme) {
@@ -401,7 +532,8 @@ function init(args) {
 }
 
 function newStandalone(args) {
-  const fileName = positionalArgs(args)[0] || 'deck.html';
+  const requestedName = positionalArgs(args)[0] || 'deck.html';
+  const fileName = normalizeHtmlOutputPath(requestedName, args);
   const out = path.resolve(process.cwd(), fileName);
   const type = normalizeType(getFlag(args, '--type', 'presentation'));
   const design = resolveDesign(type, getFlag(args, '--design', getFlag(args, '--theme', undefined)));
@@ -416,9 +548,10 @@ function newStandalone(args) {
   const html = buildStandaloneHtml(deck, { theme: design, scrollMode: deck.mode === 'scroll' || deck.mode === 'horizontal', scrollAxis: deck.direction, agentBridge });
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, html);
-  console.log(`Created standalone editable PTML file: ${out}`);
+  console.log(`Created standalone editable HTML file: ${out}`);
   console.log(`Type: ${type} · Design: ${design}`);
   console.log('Open it in a browser, press E to edit, then use Export HTML to save/share.');
+  if (requestedName !== fileName) console.log(`Note: added .html extension for browser compatibility (${fileName}).`);
 }
 
 function exportHtml(args) {
@@ -427,9 +560,147 @@ function exportHtml(args) {
   const resolvedDeckPath = path.resolve(deckPath);
   const deck = JSON.parse(fs.readFileSync(resolvedDeckPath, 'utf8'));
   const html = buildStandaloneHtml(deck, { theme: deck.theme || 'presentation-dark-tech', scrollMode: deck.mode === 'scroll' || deck.mode === 'horizontal', scrollAxis: deck.direction });
-  const out = resolvedDeckPath.replace(/\.json$/, '.html');
+  const out = resolvedDeckPath.replace(/\.(json|ptml)$/i, '.html');
   fs.writeFileSync(out, html);
   console.log(`Exported: ${out}`);
+}
+
+function createIntent(type, args) {
+  const normalizedType = normalizeType(type);
+  const requestedName = firstFileArgOrDefault(args, normalizedType);
+  const fileName = normalizeHtmlOutputPath(requestedName, args);
+  const out = path.resolve(process.cwd(), fileName);
+  const design = resolveDesign(normalizedType, getFlag(args, '--design', getFlag(args, '--theme', undefined)));
+  const title = titleFromArgs(args, path.basename(fileName, path.extname(fileName)) || 'PTML Document');
+  const agentBridge = getFlag(args, '--agent-bridge', undefined);
+  if (fs.existsSync(out) && !hasFlag(args, '--force')) {
+    console.error(`File already exists: ${out}`);
+    console.error('Use --force to overwrite.');
+    process.exit(1);
+  }
+  const deck = createStarterDeck(title, normalizedType, design);
+  const html = buildStandaloneHtml(deck, { theme: design, scrollMode: deck.mode === 'scroll' || deck.mode === 'horizontal', scrollAxis: deck.direction, agentBridge });
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, html);
+  console.log(`Created standalone editable HTML file: ${out}`);
+  console.log(`Type: ${normalizedType} · Design: ${design} · Title: ${title}`);
+  console.log('Open it in a browser, press E to edit, then use Export HTML to save/share.');
+  if (requestedName !== fileName) console.log(`Note: added .html extension for browser compatibility (${fileName}).`);
+}
+
+function makeFromNaturalLanguage(args) {
+  const text = positionalArgs(stripFlags(args, ['--out', '-o', '--title', '--design', '--theme'])).join(' ');
+  const type = normalizeType(getFlag(args, '--type', inferTypeFromText(text)));
+  const out = getFlag(args, '--out', getFlag(args, '-o', DEFAULT_FILENAMES[type] || 'ptml-output.html'));
+  const title = getFlag(args, '--title', text || path.basename(out, path.extname(out)) || 'PTML Report');
+  createIntent(type, [out, '--title', title, ...args.filter((arg) => ['--force', '--allow-non-html-extension'].includes(arg))]);
+}
+
+function designRows() {
+  return availableThemes().map((name) => ({
+    name,
+    type: DESIGN_INFO[name]?.type || 'custom',
+    aliases: DESIGN_INFO[name]?.aliases || [],
+    defaultFor: DESIGN_INFO[name]?.defaultFor || null,
+    description: DESIGN_INFO[name]?.description || 'Custom PTML design/theme.',
+    recommendedFor: DESIGN_INFO[name]?.recommendedFor || [],
+  }));
+}
+
+function listDesigns(args) {
+  const rows = designRows();
+  if (hasFlag(args, '--json')) {
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
+  if (hasFlag(args, '--details') || hasFlag(args, '-d')) {
+    console.log('Name                         Type          Default  Description');
+    console.log('----                         ----          -------  -----------');
+    for (const row of rows) {
+      console.log(`${row.name.padEnd(28)} ${row.type.padEnd(13)} ${(row.defaultFor || '').padEnd(8)} ${row.description}`);
+    }
+    return;
+  }
+  console.log(rows.map((row) => row.name).join('\n'));
+}
+
+function validateFile(args) {
+  const file = positionalArgs(args)[0];
+  if (!file) { console.error('Usage: ptml validate <file.html> [--json]'); process.exit(1); }
+  const p = path.resolve(file);
+  const result = { ok: false, file: p, extension: path.extname(p).toLowerCase(), exists: fs.existsSync(p), checks: {} };
+  if (result.exists) {
+    const s = fs.readFileSync(p, 'utf8');
+    result.checks.htmlExtension = result.extension === '.html' || result.extension === '.htm';
+    result.checks.doctype = /<!doctype html>/i.test(s);
+    result.checks.hasDeckData = s.includes('phtml-deck-data');
+    result.checks.hasRuntimeInit = s.includes('PHTML.init');
+    result.checks.hasEditHint = s.includes('phtml-hint');
+    result.checks.hasExportHtml = s.includes('Export HTML');
+    result.ok = Object.values(result.checks).every(Boolean);
+  }
+  if (hasFlag(args, '--json')) { console.log(JSON.stringify(result, null, 2)); return; }
+  if (result.ok) {
+    console.log(`PTML editable HTML OK: ${p}`);
+    return;
+  }
+  console.error(`PTML validation failed: ${p}`);
+  if (!result.exists) console.error('missing file');
+  for (const [key, value] of Object.entries(result.checks)) if (!value) console.error(`missing/failed: ${key}`);
+  process.exit(1);
+}
+
+function doctor(args) {
+  const nodeMajor = Number(process.versions.node.split('.')[0]);
+  const checks = {
+    node: nodeMajor >= 18,
+    version: Boolean(PKG.version),
+    runtimeJs: fs.existsSync(path.join(PKG_DIR, 'runtime/phtml.js')),
+    runtimeCss: fs.existsSync(path.join(PKG_DIR, 'runtime/phtml.css')),
+    themes: availableThemes().length > 0,
+    cwdWritable: (() => { try { fs.accessSync(process.cwd(), fs.constants.W_OK); return true; } catch (_) { return false; } })(),
+  };
+  const result = { ok: Object.values(checks).every(Boolean), package: PKG.name, version: PKG.version, node: process.versions.node, checks, defaultCommands: {
+    report: 'ptml report report.html --title "보고서"',
+    web: 'ptml web page.html --title "스크롤 리포트"',
+    document: 'ptml doc memo.html --title "문서"',
+    presentation: 'ptml deck slides.html --title "발표자료"',
+  } };
+  if (hasFlag(args, '--json')) { console.log(JSON.stringify(result, null, 2)); return; }
+  console.log('PTML Doctor');
+  for (const [key, value] of Object.entries(checks)) console.log(`${value ? '✓' : '✗'} ${key}`);
+  console.log(`Result: ${result.ok ? 'OK' : 'FAILED'} · ${PKG.name}@${PKG.version} · node ${process.versions.node}`);
+  if (!result.ok) process.exit(1);
+}
+
+function agentGuide(args) {
+  const guide = {
+    purpose: 'Create standalone browser-editable PTML HTML artifacts. PTML/PHTML is the runtime name; output files should end with .html.',
+    naturalLanguageDefault: '레포트를 수정가능한 html 인 phtml 양식으로 만들어줘 => ptml report report.html --title "보고서"',
+    commands: {
+      report: 'ptml report <file.html> --title "<title>"',
+      web: 'ptml web <file.html> --title "<title>"',
+      document: 'ptml doc <file.html> --title "<title>"',
+      presentation: 'ptml deck <file.html> --title "<title>"',
+      validate: 'ptml validate <file.html>',
+      designs: 'ptml designs --details or ptml designs --json',
+    },
+    doNot: ['Do not output .ptml or .phtml for browser deliverables.', 'Do not recreate edit mode manually.', 'Do not remove phtml-deck-data, PHTML.init, or Export HTML.'],
+    verify: ['file exists', 'extension is .html', 'contains phtml-deck-data', 'contains PHTML.init', 'contains Export HTML'],
+  };
+  if (hasFlag(args, '--json')) { console.log(JSON.stringify(guide, null, 2)); return; }
+  console.log(`PTML Agent Guide\n\n${guide.purpose}\n`);
+  console.log('Intent mapping:');
+  for (const [name, cmd] of Object.entries(guide.commands)) console.log(`  ${name.padEnd(12)} ${cmd}`);
+  console.log('\nDefault Korean request:');
+  console.log(`  ${guide.naturalLanguageDefault}`);
+  console.log('\nRules:');
+  for (const item of guide.doNot) console.log(`  - ${item}`);
+  console.log('\nAfter generation run: ptml validate <file.html>');
+}
+
+function printHelp() {
+  console.log(`ptml <command>\n\nCommands:\n  report [file.html] [title]      Create an editable analysis report HTML\n  web [file.html] [title]         Create an editable warm-paper scroll/web HTML\n  doc|document [file.html] [title] Create an editable memo/spec HTML\n  deck|presentation [file.html] [title]\n                                  Create an editable presentation HTML\n  make \"natural language request\" -o file.html\n                                  Infer type from text and create HTML\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                                  Create one standalone editable HTML file\n  validate <file.html> [--json]   Verify PTML editable HTML markers\n  doctor [--json]                 Check local PTML installation\n  agent-guide [--json]            Print AI-agent usage rules\n  designs [--details|--json]      List installed designs/themes\n  init [name] [--type type] [--design name]\n                                  Create a PTML project\n  serve [--port N] [--open]       Start example dev server\n  export <deck.json>              Export JSON deck as standalone HTML\n  version, --version              Print installed version\n\nExamples:\n  ptml report market-report.html --title \"시장 분석 보고서\"\n  ptml web strategy.html \"전략 스크롤 리포트\"\n  ptml doc memo.html \"운영 메모\"\n  ptml deck slides.html \"발표자료\"\n\nImportant:\n  Browser-ready outputs must use .html. Do not use .ptml or .phtml as output extensions.\n`);
 }
 
 const [,, cmd, ...rest] = process.argv;
@@ -443,11 +714,33 @@ switch (cmd) {
   case 'serve': serve(rest); break;
   case 'init': init(rest); break;
   case 'new': newStandalone(rest); break;
+  case 'report':
+  case 'reports':
+  case '레포트':
+  case '보고서':
+    createIntent('report', rest); break;
+  case 'web':
+  case 'site':
+  case 'page':
+    createIntent('web', rest); break;
+  case 'doc':
+  case 'document':
+  case 'memo':
+    createIntent('document', rest); break;
+  case 'deck':
+  case 'presentation':
+  case 'slides':
+    createIntent('presentation', rest); break;
+  case 'make': makeFromNaturalLanguage(rest); break;
   case 'export': exportHtml(rest); break;
+  case 'validate':
+  case 'inspect': validateFile(rest); break;
+  case 'doctor': doctor(rest); break;
+  case 'agent-guide':
+  case 'agents': agentGuide(rest); break;
   case 'designs':
-  case 'themes':
-    console.log(availableThemes().join('\n'));
-    break;
+  case 'themes': listDesigns(rest); break;
   default:
-    console.log(`ptml <command>\n\nCommands:\n  new [file.html] [--title T] [--type presentation|report|document|web]\n                  [--design name] [--theme name] [--agent-bridge URL] [--force]\n                         Create one standalone editable HTML file\n  init [name] [--type type] [--design name]\n                         Create a PTML project\n  serve [--port N] [--open]\n                         Start example dev server\n  export <deck.json>     Export JSON deck as standalone HTML\n  designs                List installed designs/themes\n  version, --version     Print installed version\n\nExamples:\n  ptml new llm-report.html --type report --design analyst-light\n  ptml new llm-deck.html --type presentation --design dark-tech\n  ptml new llm-doc.html --type document --design simple-doc\n  ptml new llm-site.html --type web --design warm-paper\n`);
+    if (cmd && TYPE_ALIASES[cmd]) createIntent(TYPE_ALIASES[cmd], rest);
+    else printHelp();
 }

@@ -2,7 +2,8 @@
 
 ```bash
 npm install -g @imejaim/ptml
-ptml new my-site.html --type web --title "My Scroll Report"
+ptml report my-report.html --title "My Editable Report"
+ptml validate my-report.html
 ```
 
 PTML is an installable editable HTML runtime for presentations, scrollable reports, simple documents, and immersive web-style pages.
@@ -24,14 +25,41 @@ phtml --version
 
 `ptml` is the preferred product/CLI name. `phtml` remains an alias for compatibility.
 
-## Quick start: warm paper scroll HTML anywhere
+## Quick start: natural commands for agents and humans
+
+For a report:
 
 ```bash
-ptml new my-site.html --type web --title "My Scroll Report"
+ptml report my-report.html --title "My Editable Report"
+open my-report.html
+```
+
+For a warm-paper scroll/web artifact:
+
+```bash
+ptml web my-site.html --title "My Scroll Report"
 open my-site.html
 ```
 
-The default `--type web` design is a warm-paper, vertical scroll template: landing-page polish, report-like typography, and subtle immersive effects. Open the generated standalone HTML file in a browser, press **E** to edit, then use **Export HTML** to save/share the edited version.
+For a document or presentation:
+
+```bash
+ptml doc my-memo.html --title "My Memo"
+ptml deck my-slides.html --title "My Deck"
+```
+
+The output must be `.html`. PTML/PHTML is the runtime/CLI name, not the browser-ready file extension. Do **not** create `.ptml` or `.phtml` files for deliverables.
+
+Open the generated standalone HTML file in a browser, press **E** to edit, then use **Export HTML** to save/share the edited version.
+
+AI agents can ask the CLI for compact instructions:
+
+```bash
+ptml agent-guide
+ptml doctor
+ptml designs --details
+ptml validate my-report.html
+```
 
 GitHub install fallback:
 
@@ -42,11 +70,14 @@ npm install -g git+ssh://git@github.com/imejaim/phtml-runtime.git
 ## Create standalone editable files
 
 ```bash
-ptml new llm-deck.html --type presentation --design dark-tech --title "LLM to Agent"
+ptml deck llm-deck.html --title "LLM to Agent"
+ptml report llm-report.html --title "LLM to Agent Analysis Report"
+ptml doc llm-memo.html --title "LLM to Agent Operating Memo"
+ptml web llm-web.html --title "LLM to Agent"
+
+# Equivalent low-level form:
 ptml new llm-report.html --type report --design analyst-light --title "LLM to Agent Analysis Report"
-ptml new llm-memo.html --type document --design simple-doc --title "LLM to Agent Operating Memo"
-ptml new llm-web.html --type web --title "LLM to Agent"                 # default: warm-paper scroll
-ptml new llm-paper.html --type web --design warm-paper --title "LLM to Agent"
+ptml new llm-web.html --type web --design warm-paper --title "LLM to Agent"
 ```
 
 Each output is a single HTML file:
@@ -71,6 +102,8 @@ Run:
 
 ```bash
 ptml designs
+ptml designs --details
+ptml designs --json
 ```
 
 Current design files:
@@ -123,9 +156,33 @@ The default server page opens the warm-paper scroll web example.
 ## CLI
 
 ```text
+ptml report [file.html] [title]
+    Create an editable analysis report HTML.
+
+ptml web [file.html] [title]
+    Create an editable warm-paper scroll/web HTML.
+
+ptml doc [file.html] [title]
+    Create an editable long-form document/memo/spec HTML.
+
+ptml deck [file.html] [title]
+    Create an editable presentation/deck HTML.
+
+ptml make "natural language request" -o file.html
+    Infer type from text and create editable HTML.
+
 ptml new [file.html] [--title T] [--type presentation|report|document|web]
                     [--design name] [--theme name] [--agent-bridge URL] [--force]
-    Create one standalone editable HTML file.
+    Low-level command to create one standalone editable HTML file.
+
+ptml validate <file.html> [--json]
+    Verify that a file is a PTML editable HTML artifact.
+
+ptml doctor [--json]
+    Check the local PTML installation.
+
+ptml agent-guide [--json]
+    Print compact rules for AI agents.
 
 ptml init [name] [--type type] [--design name]
     Create a PTML project with deck.json, index.html, and package.json.
@@ -136,7 +193,7 @@ ptml export <deck.json>
 ptml serve [--port N] [--open]
     Start the built-in example server.
 
-ptml designs
+ptml designs [--details|--json]
     List installed designs/themes.
 
 ptml --version
@@ -164,8 +221,17 @@ When asking an AI agent to modify an output, use this kind of instruction:
 
 ```text
 Use PTML Runtime as the baseline. Create or modify a standalone editable PTML HTML file.
-Keep the PTML edit mode, phtml-deck-data JSON, embedded runtime, and Export HTML behavior intact.
-You may change the content, layout, design, and custom CSS.
+The output filename must end with .html. Do not create .ptml or .phtml deliverables.
+Prefer the CLI: ptml report <file.html>, ptml web <file.html>, ptml doc <file.html>, or ptml deck <file.html>.
+Keep the PTML edit mode, phtml-deck-data JSON, embedded runtime, PHTML.init, and Export HTML behavior intact.
+Run ptml validate <file.html> before reporting completion.
+```
+
+For the Korean request “레포트를 수정가능한 html 인 phtml 양식으로 만들어줘”, an agent should run:
+
+```bash
+ptml report report.html --title "보고서"
+ptml validate report.html
 ```
 
 ## Data convention
