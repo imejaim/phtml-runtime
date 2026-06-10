@@ -1,4 +1,649 @@
-// PHTML Runtime v1.0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI, What-How-Why</title>
+<style>:root {
+  --phtml-bg: #0f172a;
+  --phtml-panel: rgba(15, 23, 42, 0.88);
+  --phtml-text: #f8fafc;
+  --phtml-muted: #94a3b8;
+  --phtml-accent: #38bdf8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--phtml-text);
+  overflow: hidden;
+  user-select: none;
+}
+
+.phtml-deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.phtml-slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.phtml-slide.active { display: block; }
+
+.phtml-canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: top left;
+}
+
+.phtml-canvas {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.phtml-box {
+  position: absolute;
+  min-width: 80px;
+  min-height: 36px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  user-select: text;
+  white-space: pre-wrap;
+}
+
+body.phtml-edit-mode .phtml-box {
+  outline: 1.5px dashed rgba(56, 189, 248, 0.38);
+  cursor: move;
+}
+
+body.phtml-edit-mode .phtml-box.selected {
+  outline: 3px solid rgba(56, 189, 248, 0.95);
+  background-color: rgba(56, 189, 248, 0.08);
+}
+
+body.phtml-edit-mode .phtml-box.phtml-text-overflow::after {
+  content: '↕';
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: #f97316;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.phtml-resize-handle {
+  display: none;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  right: -7px;
+  bottom: -7px;
+  background: var(--phtml-accent);
+  border-radius: 50%;
+  border: 2px solid #020617;
+  cursor: nwse-resize;
+  z-index: 10;
+}
+
+body.phtml-edit-mode .phtml-box.selected .phtml-resize-handle { display: block; }
+
+.phtml-toolbar {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  display: none;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: var(--phtml-panel);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(16px);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 24px);
+}
+
+body.phtml-edit-mode .phtml-toolbar { display: flex; }
+
+.phtml-tb-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.phtml-tb-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--phtml-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.phtml-tb-section > *:not(.phtml-tb-label) {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.phtml-tb-sep {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.phtml-tb-color-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--phtml-muted);
+  cursor: pointer;
+}
+
+.phtml-toolbar button,
+.phtml-toolbar input[type="number"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.phtml-toolbar input[type="color"] {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  border-radius: 6px;
+  width: 26px;
+  height: 22px;
+  padding: 1px 2px;
+  cursor: pointer;
+}
+
+.phtml-toolbar input[type="number"] { width: 64px; }
+
+.phtml-toolbar button {
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.phtml-toolbar button kbd {
+  font-size: 10px;
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.phtml-toolbar button:hover { background: rgba(56, 189, 248, 0.22); }
+
+.phtml-tb-exit {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+  align-self: center;
+}
+
+.phtml-tb-exit:hover { background: rgba(239, 68, 68, 0.28) !important; }
+
+.phtml-thumbnails {
+  position: fixed;
+  z-index: 90;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+body.phtml-edit-mode .phtml-thumbnails { display: none; }
+
+.phtml-thumb {
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms, border-color 120ms;
+}
+
+.phtml-thumb.active {
+  border-color: var(--phtml-accent);
+  color: var(--phtml-accent);
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.phtml-status,
+.phtml-hint {
+  position: fixed;
+  z-index: 90;
+  color: var(--phtml-muted);
+  font-size: 14px;
+  background: rgba(15, 23, 42, 0.64);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.phtml-status { top: 18px; right: 20px; }
+.phtml-hint { top: 20px; left: 24px; }
+
+.phtml-nav {
+  position: fixed;
+  bottom: 14px;
+  right: 28px;
+  display: flex;
+  gap: 8px;
+  z-index: 90;
+}
+
+.phtml-nav button {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--phtml-text);
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+[contenteditable="true"] { cursor: text; }
+
+@media (max-width: 760px) {
+  .phtml-toolbar { bottom: 46px; }
+  .phtml-hint { display: none; }
+}
+
+@media print {
+  body { overflow: visible; background: white; }
+  .phtml-toolbar, .phtml-nav, .phtml-hint, .phtml-status, .phtml-resize-handle, .phtml-thumbnails { display: none !important; }
+  .phtml-deck { height: auto; overflow: visible; }
+  .phtml-slide {
+    display: block !important;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    page-break-after: always;
+  }
+  .phtml-canvas-wrapper { transform: none !important; position: relative !important; width: 100% !important; height: 100vh !important; }
+  .phtml-canvas { width: 100% !important; height: 100% !important; }
+}
+
+/* PTML — Report Scroll Action: bright readable report with cinematic scroll scenes */
+:root {
+  --phtml-bg: #fbfcff;
+  --phtml-sheet: rgba(255, 255, 255, .86);
+  --phtml-paper: #f4f7fb;
+  --phtml-text: #172033;
+  --phtml-muted: #5e6a7d;
+  --phtml-soft: #8a95a6;
+  --phtml-accent: #315eea;
+  --phtml-accent-2: #0aa37f;
+  --phtml-accent-3: #e59b2f;
+  --phtml-border: rgba(33, 48, 77, .12);
+  --phtml-border-soft: rgba(33, 48, 77, .075);
+  --phtml-shadow: 0 24px 70px rgba(32, 48, 74, .12), 0 2px 10px rgba(32, 48, 74, .06);
+  --mx: calc((var(--ptml-mouse-x, .5) - .5) * 1px);
+  --my: calc((var(--ptml-mouse-y, .5) - .5) * 1px);
+  --scroll: var(--ptml-scroll-y, 0);
+}
+
+html { background: var(--phtml-bg); scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(circle at calc(82% + (var(--ptml-mouse-x, .5) - .5) * 14%) 7%, rgba(49, 94, 234, .13), transparent 30vw),
+    radial-gradient(circle at calc(10% - (var(--ptml-mouse-x, .5) - .5) * 10%) 28%, rgba(10, 163, 127, .08), transparent 28vw),
+    linear-gradient(180deg, #ffffff 0%, #fbfcff 48%, #f3f6fb 100%);
+  color: var(--phtml-text);
+  font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: default;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(32, 48, 74, .032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 48, 74, .024) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.78), transparent 82%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  right: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  z-index: 250;
+  border-radius: 99px;
+  background:
+    linear-gradient(180deg, var(--phtml-accent), var(--phtml-accent-2)) 0 0 / 100% calc(var(--scroll) * 100%) no-repeat,
+    rgba(33, 48, 77, .08);
+  pointer-events: none;
+}
+
+.phtml-slide { background: transparent; perspective: 1500px; }
+.phtml-canvas { background: transparent; border-radius: 0; overflow: visible; }
+.phtml-deck.flow .phtml-slide { padding: 7vh 6vw; align-items: center; }
+.phtml-deck.flow .phtml-canvas { width: min(1120px, 100%); height: 720px; min-height: 620px; margin: 0 auto; }
+
+.phtml-slide.scroll-scene .phtml-canvas {
+  opacity: .12;
+  filter: blur(5px);
+  transform: translate3d(0, 10vh, 0) scale(.97);
+  transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .95s cubic-bezier(.2,.8,.2,1), filter .8s ease;
+}
+.phtml-slide.scene-from-right .phtml-canvas { transform: translate3d(9vw, 5vh, 0) rotateY(-5deg) scale(.965); }
+.phtml-slide.scene-from-left .phtml-canvas { transform: translate3d(-9vw, 5vh, 0) rotateY(5deg) scale(.965); }
+.phtml-slide.scene-finale .phtml-canvas { transform: translate3d(0, 12vh, 0) scale(.94); }
+.phtml-slide.visible .phtml-canvas { opacity: 1; filter: blur(0); transform: translate3d(0,0,0) rotateY(0) scale(1); }
+
+.phtml-box { color: var(--phtml-text); text-wrap: pretty; }
+.phtml-box.micro-nav,
+.phtml-box.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--phtml-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.76);
+  padding: 8px 12px;
+  font: 760 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #607089;
+  box-shadow: 0 1px 0 rgba(255,255,255,.9);
+}
+.phtml-box.micro-nav::before,
+.phtml-box.pill::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--phtml-accent-2);
+  box-shadow: 0 0 0 4px rgba(10,163,127,.13);
+  flex: 0 0 auto;
+}
+
+.phtml-box.warm-title,
+.phtml-box.hero-title,
+.phtml-box.immersive-title {
+  font-size: clamp(42px, 4.4vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -.054em;
+  font-weight: 780;
+  text-wrap: balance;
+}
+.phtml-box.warm-subtitle,
+.phtml-box.hero-subtitle,
+.phtml-box.immersive-subtitle {
+  font-size: 19px;
+  line-height: 1.72;
+  color: var(--phtml-muted);
+  font-weight: 430;
+}
+.phtml-box.section-heading,
+.phtml-box.immersive-heading {
+  font-size: clamp(32px, 3.2vw, 40px);
+  line-height: 1.16;
+  letter-spacing: -.044em;
+  font-weight: 760;
+  text-wrap: balance;
+}
+.phtml-box.body,
+.phtml-box.large-copy {
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--phtml-muted);
+  font-weight: 430;
+}
+
+.phtml-box.cta,
+.phtml-box.magnetic-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #172033;
+  background: #172033;
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 740;
+  box-shadow: 0 16px 34px rgba(23,32,51,.14);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.phtml-box.cta:hover { transform: translateY(-2px); box-shadow: 0 20px 42px rgba(23,32,51,.18); }
+
+.phtml-box.report-card,
+.phtml-box.feature-card,
+.phtml-box.glass-panel,
+.phtml-box.format-card,
+.phtml-box.agent-console,
+.phtml-box.callout,
+.phtml-box.chart-card,
+.phtml-box.why-card,
+.phtml-box.side-note,
+.phtml-box.card {
+  background: var(--phtml-sheet);
+  border: 1px solid var(--phtml-border);
+  border-radius: 26px;
+  padding: 22px 24px;
+  box-shadow: var(--phtml-shadow);
+  backdrop-filter: blur(12px);
+  color: var(--phtml-muted);
+  font-size: 16px;
+  line-height: 1.62;
+}
+.phtml-box.report-card { border-radius: 30px; padding: 28px; }
+.phtml-box.report-card::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 22px;
+  border: 1px solid rgba(33,48,77,.07);
+  pointer-events: none;
+}
+.phtml-box.report-card strong,
+.phtml-box.chart-card strong,
+.phtml-box.why-card strong,
+.phtml-box.callout strong,
+.phtml-box.card strong {
+  display: block;
+  color: var(--phtml-text);
+  font-size: 20px;
+  line-height: 1.24;
+  letter-spacing: -.025em;
+  margin-bottom: 8px;
+}
+.phtml-box.chart-card span,
+.phtml-box.why-card span { display: block; color: #526077; margin-bottom: 10px; }
+.phtml-box.chart-card em { color: var(--phtml-accent); font-style: normal; font-weight: 760; }
+
+.phtml-box.metric {
+  background: #fff;
+  border: 1px solid var(--phtml-border-soft);
+  border-radius: 18px;
+  padding: 14px;
+  color: var(--phtml-soft);
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: 0 10px 30px rgba(32,48,74,.07);
+}
+.phtml-box.metric b { display: block; color: var(--phtml-text); font-size: 25px; line-height: 1.1; letter-spacing: -.04em; margin-bottom: 4px; }
+
+.phtml-box.side-note {
+  background: rgba(49,94,234,.07);
+  border-color: rgba(49,94,234,.18);
+  color: #405071;
+  box-shadow: none;
+}
+.phtml-box.accent,
+.phtml-box.motion-thread {
+  background: rgba(49,94,234,.08);
+  border: 1px solid rgba(49,94,234,.18);
+  border-radius: 999px;
+  color: #2548b9;
+  font-size: 18px;
+  line-height: 1.45;
+  text-align: center;
+  padding: 18px 26px;
+}
+
+.phtml-box.orbit-line {
+  pointer-events: none;
+  border: 1.5px solid rgba(49,94,234,.22);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(10,163,127,.06);
+  background: transparent;
+  transform: rotate(-22deg) translate3d(calc(var(--mx) * 24), calc(var(--my) * 16), 0);
+  opacity: .78;
+}
+.phtml-box.orbit-line::before,
+.phtml-box.orbit-line::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(49,94,234,.15);
+  border-radius: 50%;
+  transform: rotate(42deg);
+}
+.phtml-box.orbit-line::after { inset: 25%; transform: rotate(86deg); border-color: rgba(10,163,127,.12); }
+
+.phtml-box.chart-track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 22px;
+  border-radius: 32px;
+  border: 1px solid var(--phtml-border);
+  background: rgba(255,255,255,.82);
+  box-shadow: var(--phtml-shadow);
+}
+.phtml-box.chart-track div {
+  min-height: 250px;
+  border-radius: 22px;
+  padding: 18px 16px;
+  background: linear-gradient(180deg, rgba(49,94,234,.10), rgba(10,163,127,.07));
+  border: 1px solid rgba(49,94,234,.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.phtml-box.chart-track b { color: var(--phtml-accent); font-size: 34px; letter-spacing: -.04em; }
+.phtml-box.chart-track span { color: var(--phtml-text); font-weight: 720; line-height: 1.25; }
+
+.phtml-box.mouse-react,
+.phtml-box.depth-card,
+.phtml-box.report-card,
+.phtml-box.chart-card,
+.phtml-box.why-card {
+  transition: transform .22s ease, border-color .2s ease, box-shadow .2s ease, opacity .75s ease;
+}
+.phtml-box.mouse-react:hover,
+.phtml-box.depth-card:hover { transform: translateY(-4px); border-color: rgba(49,94,234,.24); }
+.phtml-box.report-card.mouse-react { transform: translate3d(calc(var(--mx) * 9), calc(var(--my) * 7), 0); }
+
+.phtml-box.depth-card,
+.phtml-box.chart-card,
+.phtml-box.why-card {
+  opacity: .18;
+  transform: translate3d(54px, 24px, 0) scale(.98);
+}
+.phtml-slide.scene-from-left .phtml-box.depth-card,
+.phtml-slide.scene-from-left .phtml-box.chart-card,
+.phtml-slide.scene-from-left .phtml-box.why-card {
+  transform: translate3d(-54px, 24px, 0) scale(.98);
+}
+.phtml-slide.visible .phtml-box.depth-card,
+.phtml-slide.visible .phtml-box.chart-card,
+.phtml-slide.visible .phtml-box.why-card,
+.phtml-slide.visible .phtml-box.report-card {
+  opacity: 1;
+  transform: translate3d(0,0,0) scale(1);
+}
+.phtml-slide.visible .phtml-box:nth-child(1) { transition-delay: .03s; }
+.phtml-slide.visible .phtml-box:nth-child(2) { transition-delay: .09s; }
+.phtml-slide.visible .phtml-box:nth-child(3) { transition-delay: .15s; }
+.phtml-slide.visible .phtml-box:nth-child(4) { transition-delay: .21s; }
+.phtml-slide.visible .phtml-box:nth-child(5) { transition-delay: .27s; }
+.phtml-slide.visible .phtml-box:nth-child(6) { transition-delay: .33s; }
+.phtml-slide.visible .phtml-box:nth-child(7) { transition-delay: .39s; }
+
+.phtml-status,
+.phtml-hint,
+.phtml-thumbnails {
+  background: rgba(255,255,255,.78);
+  color: var(--phtml-muted);
+  border-color: var(--phtml-border);
+  backdrop-filter: blur(12px);
+}
+.phtml-thumb.active { border-color: var(--phtml-accent); color: #2548b9; background: rgba(49,94,234,.10); }
+
+@media (max-width: 900px) {
+  .phtml-deck.flow .phtml-slide { padding: 6vh 20px; }
+  .phtml-box.warm-title,
+  .phtml-box.hero-title,
+  .phtml-box.immersive-title { font-size: 38px; }
+  .phtml-box.section-heading,
+  .phtml-box.immersive-heading { font-size: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phtml-slide.scroll-scene .phtml-canvas,
+  .phtml-box,
+  .phtml-box::before,
+  .phtml-box::after { transition: none !important; transform: none !important; filter: none !important; }
+}
+</style>
+</head>
+<body class="ptml-report">
+<div class="phtml-hint">E: edit · scroll: read · immersive effects · Export HTML</div>
+<div class="phtml-status"></div>
+<main class="phtml-deck flow"></main>
+<script id="phtml-deck-data" type="application/json">{"title":"AI, What-How-Why","type":"report","mode":"scroll","direction":"vertical","theme":"report-scroll-action","slides":[{"className":"scroll-scene scene-hero","boxes":[{"id":"rs-orbit-1","className":"phtml-box orbit-line orbit-one","html":"","x":770,"y":-110,"w":640,"h":640},{"id":"rs-pill-1","className":"phtml-box pill","html":"PTML SCROLL REPORT · EDITABLE HTML","x":78,"y":68,"w":430,"h":48},{"id":"rs-title-1","className":"phtml-box warm-title","html":"AI, What-How-Why","x":78,"y":138,"w":700,"h":164},{"id":"rs-sub-1","className":"phtml-box warm-subtitle","html":"A bright, readable report format where the reader scrolls naturally: sections move down, supporting evidence slides sideways, and the whole artifact remains editable/exportable as one HTML file.","x":82,"y":326,"w":690,"h":132},{"id":"rs-cta-1","className":"phtml-box cta mouse-react","html":"Scroll to read · Press E to edit","x":82,"y":546,"w":310,"h":58},{"id":"rs-card-1","className":"phtml-box report-card mouse-react","html":"\u003cstrong\u003eDefault direction\u003c/strong\u003eReadable first. Motion second. The scroll action guides attention without turning the report into an unreadable event site.","x":820,"y":150,"w":330,"h":230},{"id":"rs-metric-1","className":"phtml-box metric","html":"\u003cb\u003e01\u003c/b\u003eWhat","x":820,"y":430,"w":96,"h":88},{"id":"rs-metric-2","className":"phtml-box metric","html":"\u003cb\u003e02\u003c/b\u003eHow","x":934,"y":430,"w":96,"h":88},{"id":"rs-metric-3","className":"phtml-box metric","html":"\u003cb\u003e03\u003c/b\u003eWhy","x":1048,"y":430,"w":96,"h":88}]},{"className":"scroll-scene scene-from-right","boxes":[{"id":"rs-kicker-2","className":"phtml-box micro-nav","html":"01 / WHAT","x":78,"y":66,"w":230,"h":38},{"id":"rs-title-2","className":"phtml-box section-heading","html":"What: AI is becoming an operating layer, not just a chat window.","x":78,"y":128,"w":650,"h":108},{"id":"rs-body-2","className":"phtml-box body","html":"The important change is not that models produce more fluent text. The change is that models can now sit inside workflows: reading context, choosing tools, creating artifacts, and returning verifiable outputs.","x":82,"y":276,"w":650,"h":138},{"id":"rs-note-2","className":"phtml-box side-note","html":"Reading rhythm: thesis on the left, evidence moves in from the side, then the next scene resolves the implication.","x":82,"y":500,"w":520,"h":92},{"id":"rs-chart-2a","className":"phtml-box chart-card depth-card mouse-react","html":"\u003cstrong\u003eInterface\u003c/strong\u003e\u003cspan\u003ePrompt → answer\u003c/span\u003e\u003cem\u003eLow operational leverage\u003c/em\u003e","x":758,"y":132,"w":320,"h":150},{"id":"rs-chart-2b","className":"phtml-box chart-card depth-card mouse-react","html":"\u003cstrong\u003eWorkflow\u003c/strong\u003e\u003cspan\u003eIntent → tools → checks\u003c/span\u003e\u003cem\u003eMedium leverage\u003c/em\u003e","x":826,"y":318,"w":320,"h":150},{"id":"rs-chart-2c","className":"phtml-box chart-card depth-card mouse-react","html":"\u003cstrong\u003eOperating layer\u003c/strong\u003e\u003cspan\u003eMemory → action → evidence\u003c/span\u003e\u003cem\u003eHigh leverage\u003c/em\u003e","x":748,"y":504,"w":360,"h":150}]},{"className":"scroll-scene scene-from-left","boxes":[{"id":"rs-kicker-3","className":"phtml-box micro-nav","html":"02 / HOW","x":78,"y":66,"w":220,"h":38},{"id":"rs-title-3","className":"phtml-box section-heading","html":"How: reports should become navigable scenes, not static slides.","x":78,"y":126,"w":660,"h":104},{"id":"rs-body-3","className":"phtml-box body","html":"A good report has a vertical argument and horizontal evidence. The reader moves down the story while charts, cards, and comparisons arrive from the side at the exact moment they support the point.","x":82,"y":272,"w":640,"h":128},{"id":"rs-flow-3","className":"phtml-box chart-track","html":"\u003cdiv\u003e\u003cb\u003e1\u003c/b\u003e\u003cspan\u003eFrame the question\u003c/span\u003e\u003c/div\u003e\u003cdiv\u003e\u003cb\u003e2\u003c/b\u003e\u003cspan\u003eShow the mechanism\u003c/span\u003e\u003c/div\u003e\u003cdiv\u003e\u003cb\u003e3\u003c/b\u003e\u003cspan\u003eCompare options\u003c/span\u003e\u003c/div\u003e\u003cdiv\u003e\u003cb\u003e4\u003c/b\u003e\u003cspan\u003eDecide next action\u003c/span\u003e\u003c/div\u003e","x":660,"y":150,"w":520,"h":365},{"id":"rs-callout-3","className":"phtml-box callout mouse-react","html":"\u003cstrong\u003ePTML behavior\u003c/strong\u003eEach scene is still editable: double-click/add boxes in edit mode, move text, export the final HTML.","x":150,"y":520,"w":520,"h":112}]},{"className":"scroll-scene scene-from-right scene-data","boxes":[{"id":"rs-kicker-4","className":"phtml-box micro-nav","html":"03 / WHY","x":78,"y":66,"w":210,"h":38},{"id":"rs-title-4","className":"phtml-box section-heading","html":"Why: motion helps a presenter control attention without hiding the logic.","x":78,"y":126,"w":660,"h":110},{"id":"rs-body-4","className":"phtml-box body","html":"Bright typography keeps the page readable. Scroll pacing turns the report into a presentation track: the same document can be read alone, presented live, or handed to an agent for revision.","x":82,"y":286,"w":650,"h":128},{"id":"rs-why-4a","className":"phtml-box why-card depth-card","html":"\u003cstrong\u003eRead\u003c/strong\u003e\u003cspan\u003eCalm white paper, long-form line length, scan-friendly cards.\u003c/span\u003e","x":770,"y":122,"w":330,"h":132},{"id":"rs-why-4b","className":"phtml-box why-card depth-card","html":"\u003cstrong\u003ePresent\u003c/strong\u003e\u003cspan\u003eScene transitions, sideways evidence, and scroll-snap pacing.\u003c/span\u003e","x":840,"y":304,"w":330,"h":132},{"id":"rs-why-4c","className":"phtml-box why-card depth-card","html":"\u003cstrong\u003eEdit\u003c/strong\u003e\u003cspan\u003ePress E. Change text/charts. Export the revised single HTML.\u003c/span\u003e","x":760,"y":486,"w":360,"h":132}]},{"className":"scroll-scene scene-finale","boxes":[{"id":"rs-pill-5","className":"phtml-box pill","html":"DEFAULT REPORT TEMPLATE","x":78,"y":70,"w":340,"h":48},{"id":"rs-title-5","className":"phtml-box section-heading","html":"Use this as the default when someone asks for a “phtml report”.","x":78,"y":142,"w":720,"h":112},{"id":"rs-body-5","className":"phtml-box body","html":"The output is not a new file extension. It is normal .html with the PTML runtime embedded: readable in a browser, editable in place, and suitable for internal reports that need presentation-grade flow.","x":82,"y":296,"w":680,"h":126},{"id":"rs-accent-5","className":"phtml-box accent","html":"Command: ptml report report.html --title \"AI, What-How-Why\"","x":110,"y":536,"w":760,"h":72},{"id":"rs-final-5","className":"phtml-box report-card mouse-react","html":"\u003cstrong\u003eDesign promise\u003c/strong\u003eOME-DUO-like scroll action, but bright, text-first, chart-friendly, and report-safe.","x":824,"y":222,"w":320,"h":220}]}]}</script>
+<script>// PHTML Runtime v1.0
 
 (function () {
   const CANVAS_W = 1280;
@@ -458,9 +1103,9 @@
 <main class="phtml-deck"></main>
 ${toolbarHtml()}
 <div class="phtml-nav"><button onclick="prevSlide()">←</button><button onclick="nextSlide()">→</button></div>
-<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}</script>
-<script>${escapeScriptForHtml(jsText)}</script>
-<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });</script>
+<script id="phtml-deck-data" type="application/json">${escapeJsonForHtml(deck)}<\/script>
+<script>${escapeScriptForHtml(jsText)}<\/script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent) });<\/script>
 </body>
 </html>`;
     downloadText(`${slugify(deck.title)}.html`, html, 'text/html');
@@ -921,7 +1566,7 @@ ${toolbarHtml()}
   function escapeScriptForHtml(source) {
     return String(source)
       .replace(/<\/script/gi, '<\\/script')
-      .replace(/<!--/g, '<\\!--');
+      .replace(/<\!--/g, '<\\!--');
   }
 
   function slugify(value) {
@@ -988,3 +1633,7 @@ ${toolbarHtml()}
 
   Object.assign(window, window.PHTML);
 })();
+</script>
+<script>PHTML.init({ deck: JSON.parse(document.getElementById('phtml-deck-data').textContent), scrollMode: true, scrollAxis: 'vertical' });</script>
+</body>
+</html>

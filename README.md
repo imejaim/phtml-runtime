@@ -8,6 +8,8 @@ ptml validate my-report.html
 
 PTML is an installable editable HTML runtime for presentations, scrollable reports, simple documents, and immersive web-style pages.
 
+The default report design is now a bright scroll-action report: readable typography first, OME-DUO-style scene transitions second. It scrolls vertically like a report, while evidence cards/charts enter from the side so the same file can be read, presented, and edited.
+
 It is **not a new programming language**. It is a shared CLI/runtime and file convention so humans and AI agents start from the same baseline: editable boxes, deck/document data, themes, export, and optional agent control.
 
 ## Install
@@ -27,7 +29,7 @@ phtml --version
 
 ## Quick start: natural commands for agents and humans
 
-For a report:
+For the default bright scroll-action report:
 
 ```bash
 ptml report my-report.html --title "My Editable Report"
@@ -92,7 +94,7 @@ Each output is a single HTML file:
 ## Document types
 
 - `presentation`: slide/deck mode, large visual typography, arrow navigation.
-- `report`: scroll mode, executive summary, KPI cards, insight/recommendation/risk blocks.
+- `report`: default bright scroll-action mode, readable executive narrative, side-moving evidence cards/charts, presentation-ready pacing.
 - `document`: scroll mode, long-form memo/spec style, readable text and callouts.
 - `web`: default warm-paper vertical scroll, landing-page/report typography, reveal motion, mouse-reactive surfaces, and pretext-like text-flow samples.
 
@@ -111,6 +113,7 @@ Current design files:
 - `presentation-dark-tech`
 - `presentation-editorial-dark`
 - `presentation-editorial-light`
+- `report-scroll-action`
 - `report-analyst-light`
 - `document-simple`
 - `web-warm-paper`
@@ -126,7 +129,9 @@ Design aliases:
 ```bash
 --design dark-tech      # presentation-dark-tech
 --design editorial-light # presentation-editorial-light
---design analyst-light  # report-analyst-light
+--design scroll-action  # report-scroll-action, default for reports
+--design cinematic      # report-scroll-action
+--design analyst-light  # classic report-analyst-light
 --design simple-doc     # document-simple
 --design warm-paper     # web-warm-paper, also the default for --type web
 --design immersive      # alias to web-warm-paper
@@ -143,6 +148,7 @@ examples/llm-to-agent/presentation-editorial-light.html
 examples/llm-to-agent/report-analyst-light.html
 examples/llm-to-agent/document-simple.html
 examples/llm-to-agent/web-warm-paper.html
+examples/ai-what-how-why.html
 ```
 
 Serve them locally:
